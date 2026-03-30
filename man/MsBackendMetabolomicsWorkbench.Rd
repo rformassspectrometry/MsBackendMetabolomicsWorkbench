@@ -14,6 +14,7 @@ MsBackendMetabolomicsWorkbench()
   object,
   mwbId = character(),
   filePattern = "mzML$|CDF$|cdf$|mzXML$",
+  ftp_zip = FALSE,
   offline = FALSE,
   ...
 )
@@ -33,6 +34,10 @@ supported (or requested) file types. Defaults to
 \code{filePattern = "mzML$|CDF$|cdf$|mzXML$"} hence restricting to
 mzML, CDF and mzXML files which are supported by \emph{Spectra}'s
 \code{MsBackendMzR} backend.}
+
+\item{ftp_zip}{for \code{mwb_sync_data_files()}: \code{logical(1)} download the
+complete zip of the experiment from the FTP server. Defaults to \code{FALSE},
+in which case the files are downloaded singularly via POST request.}
 
 \item{offline}{\code{logical(1)} whether only locally cached content
 should be evaluated/loaded.}
@@ -85,10 +90,10 @@ Metabolomics Workbench ID. Note that at present only MS data files in \emph{mzML
 \emph{CDF} and \emph{mzXML} format are supported.
 
 The \code{MsBackendMetabolomicsWorkbench} backend defines and provides additional
-spectra variables \code{"mwb_id"}, \code{"zip_file"} and \code{"data_file"} that list
+spectra variables \code{"mwb_id"}, \code{"zip_file"} and \code{"file_name"} that list
 the MetabolomicsWorkbench ID, the original zip file name and the original
 data file name on the Metabolomics Workbench ftp server for each individual
-spectrum. The \code{"data_file"} can be used for the mapping between the
+spectrum. The \code{"file_name"} can be used for the mapping between the
 experiment's samples and the individual data files, respective their spectra.
 
 The \code{MsBackendMetabolomicsWorkbench} backend is considered \emph{read-only} and

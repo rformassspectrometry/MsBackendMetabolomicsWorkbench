@@ -40,14 +40,23 @@ test_that("backendInitialize,MsBackendMetabolomicsWorkbench works", {
                              mwbId = "ST002115",
                              filePattern = "DMSO_01_RP.mzXML$")
     expect_s4_class(res, "MsBackendMetabolomicsWorkbench")
-    expect_true(all(c("mwb_id", "zip_file", "data_file") %in%
+    expect_true(all(c("mwb_id", "zip_file", "file_name") %in%
+                        Spectra::spectraVariables(res)))
+    expect_true(all(res$mwb_id == "ST002115"))
+
+    ## Test real data set via FTP server.
+    res <- backendInitialize(MsBackendMetabolomicsWorkbench(),
+                             mwbId = "ST002115",
+                             filePattern = "DMSO_02_RP.mzXML$", ftp_zip = TRUE)
+    expect_s4_class(res, "MsBackendMetabolomicsWorkbench")
+    expect_true(all(c("mwb_id", "zip_file", "file_name") %in%
                         Spectra::spectraVariables(res)))
     expect_true(all(res$mwb_id == "ST002115"))
 
     ## Offline
     res_o <- backendInitialize(MsBackendMetabolomicsWorkbench(),
                                mwbId = "ST002115",
-                               filePattern = "HT1080_DMSO_01_RP.mzXML$",
+                               filePattern = "DMSO_02_RP.mzXML$",
                                offline = TRUE)
     expect_equal(Spectra::rtime(res), Spectra::rtime(res_o))
 })
@@ -57,14 +66,14 @@ test_that("backendRequiredSpectraVariables,MsBackendMetabolomicsWorkbench
               expect_equal(backendRequiredSpectraVariables(
                   MsBackendMetabolomicsWorkbench()),
                   c("dataStorage", "scanIndex", "mwb_id",
-                    "zip_file", "data_file"))
+                    "zip_file", "file_name"))
           })
 
 test_that("mwb_sync works", {
     expect_error(mwb_sync(3, offline = TRUE), "'x' is expected to be")
 
     x <- backendInitialize(MsBackendMetabolomicsWorkbench(), mwbId = "ST002115",
-                           filePattern = "DMSO_01_RP.mzXML$", offline = TRUE)
+                           filePattern = "DMSO_02_RP.mzXML$", offline = TRUE)
     res <- mwb_sync(x, offline = TRUE)
     expect_equal(rtime(x), rtime(res))
     expect_equal(mz(x[1:50]), mz(res[1:50]))
@@ -85,7 +94,7 @@ test_that("mwb_sync works", {
     with_mocked_bindings(
         "mwb_cached_data_files" = function(mwbId, ...) {
             data.frame(rid = c("1", "2"),
-                       data_file = c("a", "b"),
+                       file_name = c("a", "b"),
                        rpath = "tmp")
         },
         code = expect_error(mwb_sync(x, offline = TRUE), "not available")
@@ -99,7 +108,7 @@ test_that(".valid_mwb_required_columns works", {
     expect_match(.valid_mwb_required_columns(x), "One or more")
     x@spectraData$mwb_id <- 3
     x@spectraData$zip_file <- "z"
-    x@spectraData$data_file <- "b"
+    x@spectraData$file_name <- "b"
     expect_equal(.valid_mwb_required_columns(x), character())
 })
 

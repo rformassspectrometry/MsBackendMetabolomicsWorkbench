@@ -30,8 +30,9 @@ mwb_ftp_download(
 
 mwb_sync_data_files(
   mwbId = character(),
-  pattern = "mzML$|CDF$|cdf$|mzXML$",
-  fileName = character()
+  pattern = "mzML$|mzml$|CDF$|cdf$|mzXML$",
+  fileName = character(),
+  ftp_zip = FALSE
 )
 
 mwb_cached_data_files(
@@ -71,10 +72,12 @@ directory where download the files.}
 existing files should be overwritten. Defaults to \code{FALSE}, in which
 case files that already exist in \code{path} are skipped.}
 
-\item{fileName}{for \code{mwb_sync_data_files()} and
-\code{mwb_cached_data_files()}: optional \code{character}
-defining the names of specific data files of a data set that should be
-downloaded and cached.}
+\item{fileName}{for \code{mwb_sync_data_files()} and \code{mwb_cached_data_files()}: #'     optional \code{character} defining the names of specific data files of a data
+set that should be downloaded and cached.}
+
+\item{ftp_zip}{for \code{mwb_sync_data_files()}: \code{logical(1)} download the
+complete zip of the experiment from the FTP server. Defaults to \code{FALSE},
+in which case the files are downloaded singularly via POST request.}
 }
 \value{
 \itemize{

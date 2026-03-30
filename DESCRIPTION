@@ -1,6 +1,6 @@
 Package: MsBackendMetabolomicsWorkbench
 Title: Retrieve Mass Spectrometry Data from Metabolomics Workbench
-Version: 0.1.0
+Version: 0.1.1
 Authors@R:
     c(person(given = "Gabriele", family = "Tomè",
              email = "gabriele.tome@eurac.edu",
@@ -14,12 +14,12 @@ Authors@R:
              email = "Johannes.Rainer@eurac.edu",
              role = c("aut"),
              comment = c(ORCID = "0000-0002-6977-7147")))
-Description: Metabolomics Workbench is one of the main public repositories for 
-    storage of metabolomics experiments. The MsBackendMetabolomicsWorkbench 
-    package provides functionality to retrieve and represent mass spectrometry 
-    (MS) data from Metabolomics Workbench. Data files are downloaded and cached 
+Description: Metabolomics Workbench is one of the main public repositories for
+    storage of metabolomics experiments. The MsBackendMetabolomicsWorkbench
+    package provides functionality to retrieve and represent mass spectrometry
+    (MS) data from Metabolomics Workbench. Data files are downloaded and cached
     locally avoiding repetitive downloads. MS data from metabolomics experiments
-    can thus be directly and seamlessly integrated into R-based analysis 
+    can thus be directly and seamlessly integrated into R-based analysis
     workflows with the Spectra and MsBackendMetabolomicsWorkbench package.
 Depends:
     R (>= 4.2.0),
@@ -33,7 +33,9 @@ Imports:
     BiocFileCache,
     S4Vectors,
     methods,
-    progress
+    progress,
+    stringr,
+    archive
 Suggests:
     testthat,
     rmarkdown,

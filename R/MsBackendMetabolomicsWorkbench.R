@@ -74,6 +74,10 @@
 #'     mzML, CDF and mzXML files which are supported by *Spectra*'s
 #'     `MsBackendMzR` backend.
 #'
+#' @param ftp_zip for `mwb_sync_data_files()`: `logical(1)` download the
+#'     complete zip of the experiment from the FTP server. Defaults to `FALSE`,
+#'     in which case the files are downloaded singularly via POST request.
+#'
 #' @param offline `logical(1)` whether only locally cached content
 #'     should be evaluated/loaded.
 #'
@@ -104,10 +108,10 @@
 #' *CDF* and *mzXML* format are supported.
 #'
 #' The `MsBackendMetabolomicsWorkbench` backend defines and provides additional
-#' spectra variables `"mwb_id"`, `"zip_file"` and `"data_file"` that list
+#' spectra variables `"mwb_id"`, `"zip_file"` and `"file_name"` that list
 #' the MetabolomicsWorkbench ID, the original zip file name and the original
 #' data file name on the Metabolomics Workbench ftp server for each individual
-#' spectrum. The `"data_file"` can be used for the mapping between the
+#' spectrum. The `"file_name"` can be used for the mapping between the
 #' experiment's samples and the individual data files, respective their spectra.
 #'
 #' The `MsBackendMetabolomicsWorkbench` backend is considered *read-only* and
@@ -179,7 +183,8 @@ MsBackendMetabolomicsWorkbench <- function() {
 setMethod(
     "backendInitialize", "MsBackendMetabolomicsWorkbench",
     function(object, mwbId = character(),
-             filePattern = "mzML$|CDF$|cdf$|mzXML$", offline = FALSE, ...) {
+             filePattern = "mzML$|CDF$|cdf$|mzXML$", ftp_zip = FALSE,
+             offline = FALSE, ...) {
         dots <- list(...)
         if (any(names(dots) == "data"))
             stop("Parameter 'data' is not supported for ",
@@ -191,13 +196,13 @@ setMethod(
                  "ID of a Metabolomics Workbench data set.")
         if (offline)
             mdata <- .mwb_data_files_offline(mwbId, filePattern)
-        else mdata <- .mwb_data_files(mwbId, filePattern)
+        else mdata <- .mwb_data_files(mwbId, filePattern, ftp_zip = ftp_zip)
         object <- backendInitialize(MsBackendMzR(), files = mdata$rpath)
         idx <- match(dataOrigin(object),
                      normalizePath(mdata$rpath, mustWork = FALSE))
         object@spectraData$mwb_id <- mdata$mwb_id[idx]
         object@spectraData$zip_file <- mdata$zip_file[idx]
-        object@spectraData$data_file <- mdata$data_file[idx]
+        object@spectraData$file_name <- mdata$file_name[idx]
         object <- as(object, "MsBackendMetabolomicsWorkbench")
     })
 
@@ -210,15 +215,15 @@ setMethod(
 setMethod(
     "backendRequiredSpectraVariables", "MsBackendMetabolomicsWorkbench",
     function(object, ...) {
-        c(callNextMethod(), "mwb_id", "zip_file", "data_file")
+        c(callNextMethod(), "mwb_id", "zip_file", "file_name")
     })
 
 .valid_mwb_required_columns <- function(object) {
     if (nrow(object@spectraData)) {
-        if (!all(c("mwb_id", "zip_file", "data_file") %in%
+        if (!all(c("mwb_id", "zip_file", "file_name") %in%
                  colnames(object@spectraData)))
             return(paste0("One or more of required spectra variable(s) ",
-                          "\"mwb_id\", \"zip_file\", \"data_file\" is (are) ",
+                          "\"mwb_id\", \"zip_file\", \"file_name\" is (are) ",
                           "missing"))
     }
     character()
@@ -251,27 +256,26 @@ mwb_sync <- function(x, offline = FALSE) {
         stop("'x' is expected to be an instance of ",
              "'MsBackendMetabolomicsWorkbench'")
     sdata <- unique(
-        as.data.frame(x@spectraData[, c("mwb_id", "data_file")]))
-    cn <- c("data_file", "rpath")
+        as.data.frame(x@spectraData[, c("mwb_id", "file_name")]))
+    cn <- c("file_name", "rpath")
     res <- lapply(split(sdata, sdata$mwb_id), function(z, offline) {
         if (offline)
             mwb_cached_data_files(
                 sdata$mwb_id[1L], pattern = "*",
-                fileName = basename(sdata$data_file))[, cn]
+                fileName = basename(sdata$file_name))[, cn]
         else
             mwb_sync_data_files(
                 sdata$mwb_id[1L], pattern = "*",
-                fileName = basename(sdata$data_file))[, cn]
+                fileName = basename(sdata$file_name))[, cn]
     }, offline = offline)
     res <- do.call(rbind, res)
-    if (!all(sdata$data_file %in%
-             res$data_file))
+    if (!all(sdata$file_name %in% res$file_name))
         stop("Some of the data files are not available. Please run with ",
              "'offline = FALSE' to ensure data missing data files get ",
              "downloaded.")
     x@spectraData$dataStorage <- res[match(
-        x@spectraData$data_file,
-        res$data_file), "rpath"]
+        x@spectraData$file_name,
+        res$file_name), "rpath"]
     validObject(x)
     x
 }

@@ -75,10 +75,12 @@
 #'     set (i.e., files with extension `"mzML"`). This parameter is passed to
 #'     the [grepl()] function.
 #'
-#' @param fileName for `mwb_sync_data_files()` and
-#'     `mwb_cached_data_files()`: optional `character`
-#'     defining the names of specific data files of a data set that should be
-#'     downloaded and cached.
+#' @param fileName for `mwb_sync_data_files()` and `mwb_cached_data_files()`: #'     optional `character` defining the names of specific data files of a data
+#'     set that should be downloaded and cached.
+#'
+#' @param ftp_zip for `mwb_sync_data_files()`: `logical(1)` download the
+#'     complete zip of the experiment from the FTP server. Defaults to `FALSE`,
+#'     in which case the files are downloaded singularly via POST request.
 #'
 #' @param outputItem for `mwb_rest_request`: `character(1)` defining the
 #'     metadata to retrieve from Metabolomics Workbench. To get more information
@@ -312,12 +314,12 @@ mwb_ftp_download <- function(mwbId = character(), pattern = "*", path = "./",
 #'
 #' @export
 mwb_sync_data_files <- function(mwbId = character(),
-                                pattern = "mzML$|CDF$|cdf$|mzXML$",
-                                fileName = character()) {
+                                pattern = "mzML$|mzml$|CDF$|cdf$|mzXML$",
+                                fileName = character(), ftp_zip = FALSE) {
     if (!length(mwbId))
         stop("No Metabolomics Workbench data set ID provided with parameter",
              "'mwbId'")
-    .mwb_data_files(mwbId, pattern, fileName)
+    .mwb_data_files(mwbId, pattern, fileName, ftp_zip)
 }
 
 #' @rdname MetabolomicsWorkbench-utils
@@ -328,7 +330,7 @@ mwb_cached_data_files <- function(mwbId = character(),
     res <- .mwb_data_files_offline(mwbId = mwbId,
                                    pattern = pattern)
     if (length(fileName))
-        res <- res[basename(res$data_file) %in% fileName, ]
+        res <- res[basename(res$file_name) %in% fileName, ]
     else res
 }
 
@@ -348,7 +350,7 @@ mwb_cached_data_files <- function(mwbId = character(),
 #' - `"rid"`: the BiocFileCache ID of each file.
 #' - `"mwb_id"`: the MetabolomicsWorkbench ID
 #' - `"zip_file"`: the name of the zip file containing the data file
-#' - `"data_file"`: the name of the data file
+#' - `"file_name"`: the name of the data file
 #' - `"rpath"`: the name of the cached data file (full local path)
 #'
 #' @note
@@ -359,22 +361,61 @@ mwb_cached_data_files <- function(mwbId = character(),
 #'
 #' @importFrom BiocFileCache BiocFileCache
 #'
-#' @importFrom progress progress_bar
-#'
 #' @importFrom httr POST write_disk status_code
 #'
 #' @importMethodsFrom BiocFileCache bfcnew bfcmeta<- bfcremove bfcupdate
 #'
+#' @importMethodsFrom BiocFileCache bfcrpath bfccache bfcadd
+#'
 #' @noRd
 .mwb_data_files <- function(mwbId = character(),
-                            pattern = "mzML$|CDF$|mzXML$",
-                            fileName = character()) {
+                            pattern = "mzML$|mzml$|CDF$|mzXML$",
+                            fileName = character(), ftp_zip = FALSE) {
     dfiles <- mwb_list_files(mwbId, pattern = pattern)
     if(!nrow(dfiles)) {
         stop("No files matching the provided file pattern found for ",
-             "Metabolomics Workbench data set ", mwbId, ".", call. = FALSE)
+                "Metabolomics Workbench data set ", mwbId, ".", call. = FALSE)
     }
 
+    bfc <- BiocFileCache()
+
+    if (ftp_zip) {
+        res <- .mwb_data_files_ftp(mwbId, dfiles, fileName, bfc)
+        lfiles <- unlist(lapply(res, `[[`, 1))
+        dfiles <- Reduce(rbind, lapply(res, `[[`, 2))
+    } else {
+        res <- .mwb_data_files_post(mwbId, dfiles, fileName, bfc)
+        lfiles <- res$lfiles
+        dfiles <- res$dfiles
+    }
+
+
+    if (is.null(lfiles)) {
+        stop("Failed to connect to Metabolomics Workbench. ",
+                "No internet connection?")
+    }
+
+    ## Add and store metadata to the cached files
+    mdata <- data.frame(
+        rid = names(lfiles),
+        mwb_id = mwbId,
+        zip_file = dfiles$zip_file,
+        file_name = dfiles$sample_file)
+    bfcmeta(bfc, name = "MWB", overwrite = TRUE) <- mdata
+    mdata$rpath <- lfiles
+    mdata
+}
+
+#' Download and cache data files for a given MWB ID via POST request. This
+#' function is used by `.mwb_data_files()` when `ftp_zip = FALSE`.
+#'
+#' @importFrom httr POST write_disk status_code
+#'
+#' @importMethodsFrom BiocFileCache bfcnew bfcremove bfcupdate
+#'
+#' @noRd
+.mwb_data_files_post <- function(mwbId = character(), dfiles = NULL,
+                                 fileName = character(), bfc = NULL) {
     if (length(fileName)) {
         keep <- basename(dfiles$sample_file) %in% fileName
         if (!any(keep))
@@ -382,13 +423,11 @@ mwb_cached_data_files <- function(mwbId = character(),
         dfiles <- dfiles[keep, ]
     }
 
-
     ## Cache files
-    bfc <- BiocFileCache()
     pb <- progress_bar$new(format = paste0("[:bar] :current/:",
-                                           "total (:percent) in ",
-                                           ":elapsed"),
-                           total = nrow(dfiles), clear = FALSE)
+                                            "total (:percent) in ",
+                                            ":elapsed"),
+                            total = nrow(dfiles), clear = FALSE)
 
     url <- "https://metabolomicsworkbench.org/data/file_extract_7z.php"
     lfiles <- c()
@@ -403,13 +442,10 @@ mwb_cached_data_files <- function(mwbId = character(),
         cache_path <- bfcnew(bfc, sample_file, fname = "exact")
 
         invisible({
-            response <- retry(POST(
-                url,
-                body = params,
-                encode = "form",
-                write_disk(cache_path, overwrite = TRUE)
-            ),
-            sleep_mult = .sleep_mult())
+            response <- retry(POST(url, body = params, encode = "form",
+                                    write_disk(cache_path,
+                                                overwrite = TRUE)),
+                            sleep_mult = .sleep_mult())
 
             ## Remove failed POST request
             if (status_code(response) != 200) {
@@ -419,7 +455,7 @@ mwb_cached_data_files <- function(mwbId = character(),
                 rpath_update <- file.path(dirname(cache_path), sample_file)
                 file.rename(cache_path, rpath_update)
                 suppressWarnings(bfcupdate(bfc, names(cache_path),
-                                           rpath = rpath_update))
+                                            rpath = rpath_update))
                 names(rpath_update) <- names(cache_path)
 
                 lfiles <- c(lfiles, rpath_update)
@@ -427,20 +463,64 @@ mwb_cached_data_files <- function(mwbId = character(),
         })
     }
 
-    if (is.null(lfiles)) {
-        stop("Failed to connect to Metabolomics Workbench. No internet
-             connection?")
-    }
+    res <- list("lfiles" = lfiles, "dfiles" = dfiles)
+    res
+}
 
-    ## Add and store metadata to the cached files
-    mdata <- data.frame(
-        rid = names(lfiles),
-        mwb_id = mwbId,
-        zip_file = dfiles$zip_file,
-        data_file = dfiles$sample_file)
-    bfcmeta(bfc, name = "MWB", overwrite = TRUE) <- mdata
-    mdata$rpath <- lfiles
-    mdata
+#' Download and cache data files for a given MWB ID via FTP server. This
+#' function is used by `.mwb_data_files()` when `ftp_zip = TRUE`.
+#'
+#' @importFrom progress progress_bar
+#'
+#' @importFrom stringr str_replace_all
+#'
+#' @importFrom archive archive_extract
+#'
+#' @importMethodsFrom BiocFileCache bfcrpath bfccache bfcadd bfcremove
+#'
+#' @noRd
+.mwb_data_files_ftp <- function(mwbId = character(), dfiles = NULL,
+                                fileName = character(), bfc = NULL) {
+    ## Substitute the "+" with the real value " "
+    if(any(grepl("+", dfiles$sample_file)))
+        dfiles$sample_file <- str_replace_all(dfiles$sample_file,
+                                                "\\+", " ")
+    ## Substitute the "%2F" with the real value "/"
+    if(any(grepl("%2F", dfiles$sample_file)))
+        dfiles$sample_file <- str_replace_all(dfiles$sample_file,
+                                                "%2F", "/")
+
+    if (length(fileName)) {
+        keep <- basename(dfiles$sample_file) %in% fileName
+        if (!any(keep))
+            stop("None of the 'fileName' found in data set \"", mwbId, "\"")
+        dfiles <- dfiles[keep, ]
+    }
+    ## Cache files
+    zip_files <- unique(dfiles$zip_file)
+    ftp_url <- "ftp://www.metabolomicsworkbench.org/Studies/"
+    pb <- progress_bar$new(format = paste0("[:bar] :current/:",
+                                            "total (:percent) in ",
+                                            ":elapsed"),
+                            total = length(zip_files), clear = FALSE)
+    res <- lapply(zip_files, function(z) {
+        pb$tick()
+        invisible(capture.output(suppressMessages(
+            f <- retry(bfcrpath(bfc, paste0(ftp_url, z), fname = "exact"),
+                        sleep_mult = .sleep_mult()))))
+        res <- archive_extract(f, dir = bfccache(bfc),
+                                files = dfiles[dfiles$zip_file == z,
+                                                "sample_file"])
+        res_f <- bfcadd(bfc, paste0(bfccache(bfc), "/", res),
+                        fname = "exact")
+        bfcremove(bfc, rids = names(f))
+
+        dfiles <- data.frame("zip_file" = z,
+                            "sample_file" = basename(res_f))
+        list("lfiles" = res_f, "dfiles" = dfiles)
+    })
+
+    res
 }
 
 
@@ -462,11 +542,11 @@ mwb_cached_data_files <- function(mwbId = character(),
         stop("No local Metabolomics Workbench cache available. Please re-run ",
              "with 'offline = FALSE' first.", call. = FALSE)
     res <- as.data.frame(bfcquery(bfc, mwbId, field = "mwb_id"))
-    res <- res[grepl(pattern, res$data_file), ]
+    res <- res[grepl(pattern, res$file_name), ]
     if (!nrow(res))
         stop("No locally cached data files found for the specified ",
              "parameters.", call. = FALSE)
-    res[, c("rid", "mwb_id", "zip_file", "data_file", "rpath")]
+    res[, c("rid", "mwb_id", "zip_file", "file_name", "rpath")]
 }
 
 #' @importMethodsFrom BiocFileCache bfcmetalist

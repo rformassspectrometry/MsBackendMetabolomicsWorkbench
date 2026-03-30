@@ -9,6 +9,10 @@ test_that(".mwb_data_files and .mwb_data_files_offline works", {
     expect_error(.mwb_data_files(mwbId = "ST002115",
                                  pattern = "nonexistentpattern"),
                  "No files matching")
+    expect_error(.mwb_data_files(mwbId = "ST002115",
+                                 pattern = "nonexistentpattern",
+                                 ftp_zip = TRUE),
+                 "No files matching")
 
     ## Error if no cache available
     with_mocked_bindings(
@@ -17,21 +21,43 @@ test_that(".mwb_data_files and .mwb_data_files_offline works", {
                             "No local Metabolomics Workbench cache")
     )
 
-    ## Cache the data: Will use a specfic pattern to just load 2 files.
+    ## Cache the data: Will use a specific pattern to just load 4 files.
     a <- .mwb_data_files("ST002115", pattern = "01_RP.mzXML$")
     expect_true(is.data.frame(a))
     expect_true(nrow(a) == 4)
     expect_true(all(a$mwb_id == "ST002115"))
-    ## Re-call function the data.
+    ## Re-call function the data with data already cached.
     Sys.sleep(1)
     b <- .mwb_data_files("ST002115", pattern = "01_RP.mzXML$")
     expect_true(is.data.frame(b))
     expect_true(nrow(b) == 4)
     expect_true(all(b$mwb_id == "ST002115"))
     expect_equal(a$rpath, b$rpath)
+    ## Re-call function caching new and old files at the same time.
+    Sys.sleep(1)
+    c <- .mwb_data_files("ST002115", pattern = "_01_")
+    expect_true(is.data.frame(c))
+    expect_true(nrow(c) == 8)
+    expect_true(all(c$mwb_id == "ST002115"))
+
+    ## Download using the zip file in the FPT server
+    d <- .mwb_data_files("ST002115", pattern = "02_RP.mzXML$", ftp_zip = TRUE)
+    expect_true(is.data.frame(d))
+    expect_true(nrow(d) == 4)
+    expect_true(all(d$mwb_id == "ST002115"))
+    ## Re-call function the data with data already cached using the FPT server
+    e <- .mwb_data_files("ST002115", pattern = "02_RP.mzXML$", ftp_zip = TRUE)
+    expect_true(is.data.frame(e))
+    expect_true(nrow(e) == 4)
+    expect_true(all(e$mwb_id == "ST002115"))
+    ## Re-call function caching new and old files at the same time.
+    f <- .mwb_data_files("ST002115", pattern = "_02_", ftp_zip = TRUE)
+    expect_true(is.data.frame(f))
+    expect_true(nrow(f) == 8)
+    expect_true(all(f$mwb_id == "ST002115"))
 
     ## with fileNames
-    expect_error(.mwb_data_files("ST002115", pattern = "01_RP.mzXML$",
+    expect_error(.mwb_data_files("ST002115", pattern = "02_RP.mzXML$",
                                  fileName = c("a", "b")), "None of the ")
 
 
@@ -41,17 +67,61 @@ test_that(".mwb_data_files and .mwb_data_files_offline works", {
     expect_error(.mwb_data_files_offline("ST002115", pattern = ".raw$"),
                  "No locally cached data files")
 
-    d <- .mwb_data_files_offline("ST002115", pattern = "01_RP.mzXML$")
-    expect_true(is.data.frame(a))
-    expect_true(nrow(a) == 4)
-    expect_true(all(a$mwb_id == "ST002115"))
-    expect_equal(a$rpath, d$rpath)
+    g <- .mwb_data_files_offline("ST002115", pattern = "02_RP.mzXML$")
+    expect_true(is.data.frame(g))
+    expect_true(nrow(g) == 4)
+    expect_true(all(g$mwb_id == "ST002115"))
+    expect_equal(d$rpath, g$rpath)
+})
+
+test_that(".mwb_data_files_ftp works", {
+    dfiles <- mwb_list_files(x = "ST002115", pattern = "01_RP.mzXML$")
+    bfc <- BiocFileCache()
+
+    expect_error(.mwb_data_files_ftp(mwbId = "ST002115", dfiles = dfiles,
+                                    fileName = "nonexistentpattern", bfc = bfc),
+                 "None of the 'fileName'")
+
+    res <- .mwb_data_files_ftp(mwbId = "ST002115", dfiles = dfiles, bfc = bfc)
+    expect_true(is.list(res))
+
+    lfiles <- unlist(lapply(res, `[[`, 1))
+    dfiles <- Reduce(rbind, lapply(res, `[[`, 2))
+    expect_true(length(lfiles) == 4)
+    expect_true(is.data.frame(dfiles))
+    expect_true(nrow(dfiles) == 4)
+})
+
+test_that(".mwb_data_files_post works", {
+    dfiles <- mwb_list_files(x = "ST002115", pattern = "01_RP.mzXML$")
+    bfc <- BiocFileCache()
+
+    expect_error(.mwb_data_files_post(mwbId = "ST002115", dfiles = dfiles,
+                                      fileName = "nonexistentpattern",
+                                      bfc = bfc),
+                 "None of the 'fileName'")
+
+    res <- .mwb_data_files_post(mwbId = "ST002115", dfiles = dfiles, bfc = bfc)
+    expect_true(is.list(res))
+
+    lfiles <- res$lfiles
+    dfiles <- res$dfiles
+    expect_true(length(lfiles) == 4)
+    expect_true(is.data.frame(dfiles))
+    expect_true(nrow(dfiles) == 4)
 })
 
 test_that("mwb_sync_data_files works", {
     expect_error(mwb_sync_data_files(), "No Metabolomics Workbench data")
     res <- mwb_sync_data_files("ST002115", pattern = "*",
                                fileName = c("HT1080_DMSO_01_RP.mzXML"))
+    expect_true(is.data.frame(res))
+    expect_equal(nrow(res), 1L)
+    expect_equal(res$mwb_id, "ST002115")
+
+    res <- mwb_sync_data_files("ST002115", pattern = "*",
+                               fileName = c("HT1080_DMSO_02_RP.mzXML"),
+                               ftp_zip = TRUE)
     expect_true(is.data.frame(res))
     expect_equal(nrow(res), 1L)
     expect_equal(res$mwb_id, "ST002115")
