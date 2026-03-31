@@ -117,11 +117,16 @@ rely exclusively on the local \emph{BiocFileCache} cache.
 New instances of the class can be created with the
 \code{MsBackendMetabolomicsWorkbench()} function. Data is loaded and initialized
 using the \code{backendInitialize()} function, which accepts parameters \code{mwbId},
-and \code{filePattern}. \code{mwbId} must be the accession of a \strong{single} existing
-Metabolomics Workbench study (e.g. \code{"ST000016"}). Optional parameter
+\code{filePattern} and \code{ftp_zip}. \code{mwbId} must be the accession of a \strong{single}
+existing Metabolomics Workbench study (e.g. \code{"ST000016"}). Optional parameter
 \code{filePattern} defines the pattern used to filter the file names of the MS
 data files and defaults to data files with file endings of supported MS data
-formats.
+formats. Optional parameter \code{ftp_zip = TRUE} will download the complete zip
+file of the experiment from the FTP server and extract the data files
+locally, which can be faster than downloading the files singularly via POST
+request. However if only a subset of the data files is required, it is more
+efficient to download the files singularly via POST request with
+\code{ftp_zip = FALSE} and \code{filePattern} set to the desired file name pattern.
 \code{backendInitialize()} requires an active internet connection, as the function
 queries the Metabolomics Workbench via POST request and compares remote file
 content against locally cached files before synchronizing any changes or

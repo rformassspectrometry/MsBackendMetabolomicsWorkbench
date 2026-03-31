@@ -1,5 +1,9 @@
 # MsBackendMetabolomicsWorkbench 0.1
 
+## Changes in 0.1.2
+
+- Update documentation.
+
 ## Changes in 0.1.1
 
 - Possibility to download the zip file of the experiment from the FTP server.

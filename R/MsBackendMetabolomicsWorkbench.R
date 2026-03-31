@@ -31,11 +31,16 @@
 #' New instances of the class can be created with the
 #' `MsBackendMetabolomicsWorkbench()` function. Data is loaded and initialized
 #' using the `backendInitialize()` function, which accepts parameters `mwbId`,
-#' and `filePattern`. `mwbId` must be the accession of a **single** existing
-#' Metabolomics Workbench study (e.g. `"ST000016"`). Optional parameter
+#' `filePattern` and `ftp_zip`. `mwbId` must be the accession of a **single**
+#' existing Metabolomics Workbench study (e.g. `"ST000016"`). Optional parameter
 #' `filePattern` defines the pattern used to filter the file names of the MS
 #' data files and defaults to data files with file endings of supported MS data
-#' formats.
+#' formats. Optional parameter `ftp_zip = TRUE` will download the complete zip
+#' file of the experiment from the FTP server and extract the data files
+#' locally, which can be faster than downloading the files singularly via POST
+#' request. However if only a subset of the data files is required, it is more
+#' efficient to download the files singularly via POST request with
+#' `ftp_zip = FALSE` and `filePattern` set to the desired file name pattern.
 #' `backendInitialize()` requires an active internet connection, as the function
 #' queries the Metabolomics Workbench via POST request and compares remote file
 #' content against locally cached files before synchronizing any changes or

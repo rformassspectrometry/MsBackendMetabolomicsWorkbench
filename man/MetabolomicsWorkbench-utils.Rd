@@ -133,17 +133,22 @@ change any other data eventually present in the local \code{BiocFileCache}.
 }
 }
 \details{
-Metabolomics Workbench uses a
-\href{https://metabolomicsworkbench.org/tools/mw_rest.php}{REST API} to provide
-metadata files. To retrieve the MS files, there are two approaches. The
-first is to download the \code{zip} files available on the
-\href{ftp://www.metabolomicsworkbench.org/Studies/}{FTP server}. The second
-approach allows downloading individual files via two POST requests.
-First, the
-\href{https://metabolomicsworkbench.org/data/show_archive_contents_link.php}{MWB show archive page}
-is queried to obtain the correct file names. Then, the files are
-downloaded and cached via a POST request to the
-\href{https://metabolomicsworkbench.org/data/file_extract_7z.php}{MWB file extract page}.
+Metabolomics Workbench provides metadata through a
+\href{https://metabolomicsworkbench.org/tools/mw_rest.php}{REST API}. MS data
+files can be obtained in two ways:
+\enumerate{
+\item Download the full \code{zip} archive from the
+\href{ftp://www.metabolomicsworkbench.org/Studies/}{FTP server}. Use a POST
+request to the
+\href{https://metabolomicsworkbench.org/data/show_archive_contents_link.php}{MWB archive page}
+to get the correct \code{zip} archive name. The archive contains all files for the
+experiment, which may include unneeded files. If only a subset of files is
+needed, the second option is more efficient.
+\item Download individual files using a two-step POST-based procedure: query the
+\href{https://metabolomicsworkbench.org/data/show_archive_contents_link.php}{MWB archive page}
+to get exact file names. After, download each file via
+\href{https://metabolomicsworkbench.org/data/file_extract_7z.php}{POST request}.
+}
 }
 \examples{
 

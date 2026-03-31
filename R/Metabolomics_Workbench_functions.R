@@ -49,17 +49,20 @@
 #'
 #' @details
 #'
-#' Metabolomics Workbench uses a
-#' [REST API](https://metabolomicsworkbench.org/tools/mw_rest.php) to provide
-#' metadata files. To retrieve the MS files, there are two approaches. The
-#' first is to download the `zip` files available on the
-#' [FTP server](ftp://www.metabolomicsworkbench.org/Studies/). The second
-#' approach allows downloading individual files via two POST requests.
-#' First, the
-#' [MWB show archive page](https://metabolomicsworkbench.org/data/show_archive_contents_link.php)
-#' is queried to obtain the correct file names. Then, the files are
-#' downloaded and cached via a POST request to the
-#' [MWB file extract page](https://metabolomicsworkbench.org/data/file_extract_7z.php).
+#' Metabolomics Workbench provides metadata through a
+#' [REST API](https://metabolomicsworkbench.org/tools/mw_rest.php). MS data
+#' files can be obtained in two ways:
+#' 1. Download the full `zip` archive from the
+#' [FTP server](ftp://www.metabolomicsworkbench.org/Studies/). Use a POST
+#' request to the
+#' [MWB archive page](https://metabolomicsworkbench.org/data/show_archive_contents_link.php)
+#' to get the correct `zip` archive name. The archive contains all files for the
+#' experiment, which may include unneeded files. If only a subset of files is
+#' needed, the second option is more efficient.
+#' 2. Download individual files using a two-step POST-based procedure: query the
+#' [MWB archive page](https://metabolomicsworkbench.org/data/show_archive_contents_link.php)
+#' to get exact file names. After, download each file via
+#' [POST request](https://metabolomicsworkbench.org/data/file_extract_7z.php).
 #'
 #'
 #' @param x `character(1)` with the ID of the MBW data set (usually
@@ -294,7 +297,7 @@ mwb_ftp_download <- function(mwbId = character(), pattern = "*", path = "./",
             invisible(capture.output(suppressMessages(
                 retry(
                     download.file(paste0(ftp_url, x),
-                                  destfile = file.path(path, x), quiet = T),
+                                  destfile = file.path(path, x), quiet = TRUE),
                     sleep_mult = .sleep_mult()))))
         }, error = function(e) {
             stop("Failed to connect to Metabolomics Workbench FTP server.",
