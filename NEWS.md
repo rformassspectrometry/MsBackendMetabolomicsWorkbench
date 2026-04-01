@@ -1,5 +1,9 @@
 # MsBackendMetabolomicsWorkbench 0.1
 
+## Changes in 0.1.3
+
+- Add vignette.
+
 ## Changes in 0.1.2
 
 - Update documentation.
