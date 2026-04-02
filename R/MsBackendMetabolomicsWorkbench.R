@@ -37,9 +37,9 @@
 #' data files and defaults to data files with file endings of supported MS data
 #' formats. Optional parameter `ftp_zip = TRUE` will download the complete zip
 #' file of the experiment from the FTP server and extract the data files
-#' locally, which can be faster than downloading the files singularly via POST
+#' locally, which can be faster than downloading the files individually via POST
 #' request. However if only a subset of the data files is required, it is more
-#' efficient to download the files singularly via POST request with
+#' efficient to download the files separately *via* POST request with
 #' `ftp_zip = FALSE` and `filePattern` set to the desired file name pattern.
 #' `backendInitialize()` requires an active internet connection, as the function
 #' queries the Metabolomics Workbench via POST request and compares remote file
@@ -155,7 +155,6 @@
 #' be <- mwb_sync(be)
 NULL
 
-
 setClass("MsBackendMetabolomicsWorkbench",
          contains = "MsBackendMzR")
 
@@ -210,7 +209,6 @@ setMethod(
         object@spectraData$file_name <- mdata$file_name[idx]
         object <- as(object, "MsBackendMetabolomicsWorkbench")
     })
-
 
 #' @rdname MsBackendMetabolomicsWorkbench
 #'
@@ -284,4 +282,3 @@ mwb_sync <- function(x, offline = FALSE) {
     validObject(x)
     x
 }
-

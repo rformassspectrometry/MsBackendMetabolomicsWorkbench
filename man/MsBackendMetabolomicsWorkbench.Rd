@@ -123,9 +123,9 @@ existing Metabolomics Workbench study (e.g. \code{"ST000016"}). Optional paramet
 data files and defaults to data files with file endings of supported MS data
 formats. Optional parameter \code{ftp_zip = TRUE} will download the complete zip
 file of the experiment from the FTP server and extract the data files
-locally, which can be faster than downloading the files singularly via POST
+locally, which can be faster than downloading the files individually via POST
 request. However if only a subset of the data files is required, it is more
-efficient to download the files singularly via POST request with
+efficient to download the files separately \emph{via} POST request with
 \code{ftp_zip = FALSE} and \code{filePattern} set to the desired file name pattern.
 \code{backendInitialize()} requires an active internet connection, as the function
 queries the Metabolomics Workbench via POST request and compares remote file
