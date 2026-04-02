@@ -31,8 +31,11 @@
 #'
 #' - `mwb_ftp_list_files()`: queries the Metabolomics Workbench FTP server for a
 #'   given experiment ID and returns the related files. Parameter `pattern`
-#'   allows to filter the results. In contrast to `mwb_list_files()` TODO:
-#'   please describe what the difference is
+#'   allows to filter the results. In contrast to `mwb_list_files()`, this
+#'   function lists only the files on the FTP server (like the zip file of the
+#'   experiment), while `mwb_list_files()` lists the files contained within the
+#'   zip file. Other files may also be present on the FTP server. This function
+#'   requires an active internet connection.
 #'
 #' - `mwb_ftp_download()`: download files from Metabolomics Workbench FTP
 #'   server for a given experiment ID. Use `pattern` to filter files by name
