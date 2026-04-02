@@ -17,10 +17,11 @@
 #' - `mwb_list_files()`: returns the available files for the specified
 #'   Metabolomics Workbench data set by submitting a POST request to the
 #'   Metabolomics Workbench archive contents endpoint. The function returns a
-#'   `data.frame` with columns `zip_file` and `sample_file` containing,
-#'   respectively, the archive name and the relative file within that archive.
+#'   `data.frame` with columns `"zip_file"` and `"sample_file"` containing the
+#'   archive name and the file name within that archive.
 #'   Parameter `pattern` allows to filter the results by matching against the
-#'   `sample_file` column.
+#'   `"sample_file"` column. This function requires an active internet
+#'   connection.
 #'
 #' - `mwb_rest_request()`: queries the Metabolomics Workbench REST API for
 #'   a given study ID and output item (e.g. `summary`, `factors`).
@@ -30,12 +31,14 @@
 #'
 #' - `mwb_ftp_list_files()`: queries the Metabolomics Workbench FTP server for a
 #'   given experiment ID and returns the related files. Parameter `pattern`
-#'   allows to filter the results.
+#'   allows to filter the results. In contrast to `mwb_list_files()` TODO:
+#'   please describe what the difference is
 #'
-#' - `mwb_ftp_download()`: download from Metabolomics Workbench FTP server the
-#'   files for a given experiment ID. Use `pattern` to filter files by name
-#'   using a regular expression (downloads all files by default). Use `path` to
-#'   set the destination directory for downloaded files.
+#' - `mwb_ftp_download()`: download files from Metabolomics Workbench FTP
+#'   server for a given experiment ID. Use `pattern` to filter files by name
+#'   using a regular expression (by default all files are downloaded). Use
+#'   `path` to set the destination directory for downloaded files. Only files
+#'   listed by `mwb_ftp_list_files()` can be downloaded.
 #'
 #' - `mwb_sync_data_files()`: synchronize data files of a specified
 #'   MWB data set eventually downloading and locally caching them.
@@ -52,17 +55,19 @@
 #' Metabolomics Workbench provides metadata through a
 #' [REST API](https://metabolomicsworkbench.org/tools/mw_rest.php). MS data
 #' files can be obtained in two ways:
-#' 1. Download the full `zip` archive from the
-#' [FTP server](ftp://www.metabolomicsworkbench.org/Studies/). Use a POST
-#' request to the
-#' [MWB archive page](https://metabolomicsworkbench.org/data/show_archive_contents_link.php)
-#' to get the correct `zip` archive name. The archive contains all files for the
-#' experiment, which may include unneeded files. If only a subset of files is
-#' needed, the second option is more efficient.
+#'
+#' 1. Downloading the full *zip* archive from the
+#'    [FTP server](ftp://www.metabolomicsworkbench.org/Studies/). A POST
+#'    request to the
+#'    [MWB archive page](https://metabolomicsworkbench.org/data/show_archive_contents_link.php)
+#'    gets the correct *zip* archive name for a MWB ID. The archive contains
+#'    all files of the experiment, which may include also unneeded files. If
+#'    only a subset of files is needed, the second option is more efficient.
+#'
 #' 2. Download individual files using a two-step POST-based procedure: query the
-#' [MWB archive page](https://metabolomicsworkbench.org/data/show_archive_contents_link.php)
-#' to get exact file names. After, download each file via
-#' [POST request](https://metabolomicsworkbench.org/data/file_extract_7z.php).
+#'    [MWB archive page](https://metabolomicsworkbench.org/data/show_archive_contents_link.php)
+#'    to get exact file names. Then, download each file via
+#'    [POST request](https://metabolomicsworkbench.org/data/file_extract_7z.php).
 #'
 #'
 #' @param x `character(1)` with the ID of the MBW data set (usually
@@ -78,19 +83,20 @@
 #'     set (i.e., files with extension `"mzML"`). This parameter is passed to
 #'     the [grepl()] function.
 #'
-#' @param fileName for `mwb_sync_data_files()` and `mwb_cached_data_files()`: #'     optional `character` defining the names of specific data files of a data
+#' @param fileName for `mwb_sync_data_files()` and `mwb_cached_data_files()`:
+#'     optional `character` defining the names of specific data files of a data
 #'     set that should be downloaded and cached.
 #'
 #' @param ftp_zip for `mwb_sync_data_files()`: `logical(1)` download the
 #'     complete zip of the experiment from the FTP server. Defaults to `FALSE`,
 #'     in which case the files are downloaded singularly via POST request.
 #'
-#' @param outputItem for `mwb_rest_request`: `character(1)` defining the
+#' @param outputItem for `mwb_rest_request()`: `character(1)` defining the
 #'     metadata to retrieve from Metabolomics Workbench. To get more information
 #'     about the possible output visit the webpage
 #'     [MBW REST API](https://metabolomicsworkbench.org/tools/mw_rest.php).
 #'
-#' @param outputFormat for `mwb_rest_request`: `character(1)` defining the
+#' @param outputFormat for `mwb_rest_request()`: `character(1)` defining the
 #'     output format of the metadata. The supported output are `json` and `txt`.
 #'
 #' @param path for `mwb_ftp_download()`: optional `character` defining the
@@ -130,6 +136,7 @@
 #' ## List zip file of the data set ST002115
 #' mwb_ftp_list_files("ST002115")
 #'
+#' ## Download the file with: `mwb_ftp_download("ST002115", path = tempdir())`
 NULL
 
 #' @importFrom httr POST content
@@ -140,7 +147,7 @@ NULL
 #'
 #' @export
 mwb_list_files <- function(x = character(), pattern = NULL) {
-    if(length(x) > 1)
+    if(length(x) != 1)
         stop("Provide a single Metabolomics Workbench ID.")
 
     # MWB lisf files function
@@ -220,7 +227,7 @@ mwb_rest_request <- function(mwbId = character(), outputItem = character(),
              e$message, call. = FALSE)
     })
 
-    return(response)
+    response
 }
 
 #' @importFrom curl curl new_handle handle_setopt
@@ -256,7 +263,7 @@ mwb_ftp_list_files <- function(mwbId = character(), pattern = "*") {
         stop("No files matching the provided file pattern found for ",
              "data set ", mwbId, ".", call. = FALSE)
 
-    return(list_ftp_files)
+    list_ftp_files
 }
 
 #' @importFrom progress progress_bar
@@ -391,7 +398,6 @@ mwb_cached_data_files <- function(mwbId = character(),
         lfiles <- res$lfiles
         dfiles <- res$dfiles
     }
-
 
     if (is.null(lfiles)) {
         stop("Failed to connect to Metabolomics Workbench. ",
@@ -575,4 +581,3 @@ mwb_delete_cache <- function(mwbId = character()) {
         }
     }
 }
-

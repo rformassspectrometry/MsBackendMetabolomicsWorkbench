@@ -57,12 +57,12 @@ the \code{\link[=grepl]{grepl()}} function.}
 \item{mwbId}{\code{character(1)} with the ID of a single Metabolomics
 Workbench data set/experiment.}
 
-\item{outputItem}{for \code{mwb_rest_request}: \code{character(1)} defining the
+\item{outputItem}{for \code{mwb_rest_request()}: \code{character(1)} defining the
 metadata to retrieve from Metabolomics Workbench. To get more information
 about the possible output visit the webpage
 \href{https://metabolomicsworkbench.org/tools/mw_rest.php}{MBW REST API}.}
 
-\item{outputFormat}{for \code{mwb_rest_request}: \code{character(1)} defining the
+\item{outputFormat}{for \code{mwb_rest_request()}: \code{character(1)} defining the
 output format of the metadata. The supported output are \code{json} and \code{txt}.}
 
 \item{path}{for \code{mwb_ftp_download()}: optional \code{character} defining the
@@ -72,7 +72,8 @@ directory where download the files.}
 existing files should be overwritten. Defaults to \code{FALSE}, in which
 case files that already exist in \code{path} are skipped.}
 
-\item{fileName}{for \code{mwb_sync_data_files()} and \code{mwb_cached_data_files()}: #'     optional \code{character} defining the names of specific data files of a data
+\item{fileName}{for \code{mwb_sync_data_files()} and \code{mwb_cached_data_files()}:
+optional \code{character} defining the names of specific data files of a data
 set that should be downloaded and cached.}
 
 \item{ftp_zip}{for \code{mwb_sync_data_files()}: \code{logical(1)} download the
@@ -106,10 +107,11 @@ lookup.
 \item \code{mwb_list_files()}: returns the available files for the specified
 Metabolomics Workbench data set by submitting a POST request to the
 Metabolomics Workbench archive contents endpoint. The function returns a
-\code{data.frame} with columns \code{zip_file} and \code{sample_file} containing,
-respectively, the archive name and the relative file within that archive.
+\code{data.frame} with columns \code{"zip_file"} and \code{"sample_file"} containing the
+archive name and the file name within that archive.
 Parameter \code{pattern} allows to filter the results by matching against the
-\code{sample_file} column.
+\code{"sample_file"} column. This function requires an active internet
+connection.
 \item \code{mwb_rest_request()}: queries the Metabolomics Workbench REST API for
 a given study ID and output item (e.g. \code{summary}, \code{factors}).
 Returns the raw response as a \code{character} string in the format specified
@@ -117,11 +119,13 @@ by \code{outputFormat} (\code{json} or \code{txt}). This function requires an
 active internet connection.
 \item \code{mwb_ftp_list_files()}: queries the Metabolomics Workbench FTP server for a
 given experiment ID and returns the related files. Parameter \code{pattern}
-allows to filter the results.
-\item \code{mwb_ftp_download()}: download from Metabolomics Workbench FTP server the
-files for a given experiment ID. Use \code{pattern} to filter files by name
-using a regular expression (downloads all files by default). Use \code{path} to
-set the destination directory for downloaded files.
+allows to filter the results. In contrast to \code{mwb_list_files()} TODO:
+please describe what the difference is
+\item \code{mwb_ftp_download()}: download files from Metabolomics Workbench FTP
+server for a given experiment ID. Use \code{pattern} to filter files by name
+using a regular expression (by default all files are downloaded). Use
+\code{path} to set the destination directory for downloaded files. Only files
+listed by \code{mwb_ftp_list_files()} can be downloaded.
 \item \code{mwb_sync_data_files()}: synchronize data files of a specified
 MWB data set eventually downloading and locally caching them.
 Parameter \code{fileName} allows to specify names of selected data files to
@@ -137,16 +141,16 @@ Metabolomics Workbench provides metadata through a
 \href{https://metabolomicsworkbench.org/tools/mw_rest.php}{REST API}. MS data
 files can be obtained in two ways:
 \enumerate{
-\item Download the full \code{zip} archive from the
-\href{ftp://www.metabolomicsworkbench.org/Studies/}{FTP server}. Use a POST
+\item Downloading the full \emph{zip} archive from the
+\href{ftp://www.metabolomicsworkbench.org/Studies/}{FTP server}. A POST
 request to the
 \href{https://metabolomicsworkbench.org/data/show_archive_contents_link.php}{MWB archive page}
-to get the correct \code{zip} archive name. The archive contains all files for the
-experiment, which may include unneeded files. If only a subset of files is
-needed, the second option is more efficient.
+gets the correct \emph{zip} archive name for a MWB ID. The archive contains
+all files of the experiment, which may include also unneeded files. If
+only a subset of files is needed, the second option is more efficient.
 \item Download individual files using a two-step POST-based procedure: query the
 \href{https://metabolomicsworkbench.org/data/show_archive_contents_link.php}{MWB archive page}
-to get exact file names. After, download each file via
+to get exact file names. Then, download each file via
 \href{https://metabolomicsworkbench.org/data/file_extract_7z.php}{POST request}.
 }
 }
@@ -165,6 +169,7 @@ mwb_rest_request("ST002115", outputItem = "summary")
 ## List zip file of the data set ST002115
 mwb_ftp_list_files("ST002115")
 
+## Download the file with: `mwb_ftp_download("ST002115", path = tempdir())`
 }
 \author{
 Gabriele Tomè, Johannes Rainer, Philippine Louail

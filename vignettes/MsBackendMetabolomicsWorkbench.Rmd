@@ -92,11 +92,12 @@ mwb_ftp_list_files("ST002115")
 ```
 
 The FTP archive contains all files for the experiment, which may include
-unneeded files. If only a subset of files is needed, the POST option is more
-efficient. By default, all MS data files of the data set would be retrieved,
-but in our example below we restrict to a few data files to reduce the amount
-of data that needs to be downloaded. To this end we define a pattern matching
-the file name of only some data files using the `filePattern` parameter.
+unneeded files. If only a subset of files is needed, the default POST option
+(with `ftp_zip = FALSE`) is more efficient. By default, all MS data files of the
+data set would be retrieved, but in our example below we restrict to a few data
+files to reduce the amount of data that needs to be downloaded. To this end we
+define a pattern matching the file name of only some data files using the
+`filePattern` parameter.
 
 ```{r}
 library(Spectra)
@@ -114,12 +115,12 @@ managed directly using functionality from that package. Any subsequent loading
 of the same data files will load the locally cached versions avoiding thus
 repetitive download of the same data.
 
-The `Spectra` object with the MS data files of the MassIVE data set enables now
-any subsequent analysis of the data in R. On top of the spectra variables and
-mass peak data values that are provided by the MS data files also additional
-information related to the Metabolomics Workbench data set are available as
-specific *spectra variables*. We list all available spectra variables of the
-data set below.
+The `Spectra` object with the MS data files of the Metabolomics Workbench data
+set enables now any subsequent analysis of the data in R. On top of the spectra
+variables and mass peak data values that are provided by the MS data files also
+additional information related to the Metabolomics Workbench data set are
+available as specific *spectra variables*. We list all available spectra
+variables of the data set below.
 
 ```{r}
 spectraVariables(s)
@@ -154,7 +155,8 @@ downloading, this function first evaluates if the respective data files are
 already cached and only downloads them if needed. As a result, the function
 returns a `data.frame` with the storage location and other information of the
 cached file(s). Below we use this function to retrieve the local storage
-information on one of the data files of the MassIVE data set *ST002115*:
+information on one of the data files of the Metabolomics Workbench data set
+*ST002115*:
 
 ```{r}
 res <- mwb_sync_data_files("ST002115",

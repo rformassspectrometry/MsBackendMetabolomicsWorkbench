@@ -75,6 +75,7 @@ test_that(".mwb_data_files and .mwb_data_files_offline works", {
 })
 
 test_that(".mwb_data_files_ftp works", {
+    expect_error(mwb_list_files(), "Provide a single")
     dfiles <- mwb_list_files(x = "ST002115", pattern = "01_RP.mzXML$")
     bfc <- BiocFileCache()
 
