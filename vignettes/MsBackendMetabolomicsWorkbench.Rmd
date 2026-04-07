@@ -1,0 +1,213 @@
+---
+title: "Retrieve and Use Mass Spectrometry Data from Metabolomics Workbench"
+output:
+    BiocStyle::html_document:
+        toc_float: true
+vignette: >
+    %\VignetteIndexEntry{Retrieve and Use Mass Spectrometry Data from Metabolomics Workbench}
+    %\VignetteEngine{knitr::rmarkdown}
+    %\VignetteEncoding{UTF-8}
+    %\VignettePackage{MsBackendMetabolomicsWorkbench}
+    %\VignetteDepends{Spectra,BiocStyle,jsonlite}
+---
+
+```{r style, echo = FALSE, results = 'asis', message=FALSE}
+BiocStyle::markdown()
+```
+
+**Package**: `r Biocpkg("MsBackendMetabolomicsWorkbench")`<br />
+**Authors**: `r packageDescription("MsBackendMetabolomicsWorkbench")[["Author"]] `<br />
+**Last modified:** `r file.info("MsBackendMetabolomicsWorkbench.Rmd")$mtime`<br />
+**Compiled**: `r date()`
+
+```{r, echo = FALSE, message = FALSE}
+library(Spectra)
+library(BiocStyle)
+library(jsonlite)
+```
+
+# Introduction
+
+Metabolomics experiments and results including mass spectrometry (MS) data can
+be deposited in several public repositories, such as
+[Metabolomics Workbench](https://metabolomicsworkbench.org/) repository, a data
+resource developed by the NIH Common Fund's Data Repository and Coordinating
+Center (DRCC) at the San Diego Supercomputer Center, University of California
+San Diego. While data is available, manual lookup and download is cumbersome
+hampering the re-analysis of public data and replication of results. The
+*MsBackendMetabolomicsWorkbench* package closes this gap by providing
+functionality to query, retrieve and cache MS data from Metabolomics Workbench
+directly from R hence enabling a direct and seamless integration of MS data from
+Metabolomics Workbench into R-based analysis workflows.
+*MsBackendMetabolomicsWorkbench* leverages on Bioconductor's
+`r Biocpkg("BiocFileCache")` for caching remote data locally and provides a *MS
+data backend* for the `r Biocpkg("Spectra")` package to enable loading and
+integrating cached MS data directly into R.
+
+# Installation
+
+The package can be installed from within R with the commands below:
+
+```{r, eval = FALSE}
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("RforMassSpectrometry/MsBackendMetabolomicsWorkbench")
+```
+
+# Importing MS Data from Metabolomics Workbench
+
+Each experiment in Metabolomics Workbench is identified by a unique accession
+starting with *ST* followed by a number. The repository provides programmatic
+access via the Metabolomics Workbench REST API and POST requests, so users can
+query experiments and associated data files directly. With
+`MsBackendMetabolomicsWorkbench`, you can resolve these accessions and download
+supported MS files (mzML/CDF/mzXML) into a local cache, then load them into a
+`Spectra` object for downstream processing.
+
+Below we list all files from Metabolomics Workbench experiment *ST002115*.
+
+```{r}
+library(MsBackendMetabolomicsWorkbench)
+
+#' List files of a Metabolomics Workbench data set
+all_files <- mwb_list_files("ST002115")
+head(all_files)
+```
+
+MS data files in supported formats (mzML, CDF, mzXML) can be directly loaded
+using the `MsBackendMetabolomicsWorkbench` backend into R as a `Spectra` object
+(`MsBackendMetabolomicsWorkbench` directly extends *Spectra*'s `MsBackendMzR`
+backend and therefore supports import of MS data files in these formats). There
+are two supported download modes:
+
+1. POST request to fetch individual data files. (*default*)
+2. FTP request to download the zip containing all files of the experiment.
+
+Below we list zip file of Metabolomics Workbench experiment *ST002115*.
+
+```{r}
+#' List zipped FTP files for a Metabolomics Workbench data set
+mwb_ftp_list_files("ST002115")
+```
+
+The FTP archive contains all files for the experiment, which may include
+unneeded files. If only a subset of files is needed, the default POST option
+(with `ftp_zip = FALSE`) is more efficient. By default, all MS data files of the
+data set would be retrieved, but in our example below we restrict to a few data
+files to reduce the amount of data that needs to be downloaded. To this end we
+define a pattern matching the file name of only some data files using the
+`filePattern` parameter.
+
+```{r}
+library(Spectra)
+
+#' Load MS data files of one data set
+s <- Spectra("ST002115", filePattern = "01_RP.mzXML$", ftp_zip = FALSE,
+             source = MsBackendMetabolomicsWorkbench())
+s
+```
+
+This call downloaded 4 files from the experiment into the local cache and loaded
+them as a `Spectra` object. The downloading and caching of the data is handled
+by Bioconductor's `r Biocpkg("BiocFileCache")`. The local cache can thus also be
+managed directly using functionality from that package. Any subsequent loading
+of the same data files will load the locally cached versions avoiding thus
+repetitive download of the same data.
+
+The `Spectra` object with the MS data files of the Metabolomics Workbench data
+set enables now any subsequent analysis of the data in R. On top of the spectra
+variables and mass peak data values that are provided by the MS data files also
+additional information related to the Metabolomics Workbench data set are
+available as specific *spectra variables*. We list all available spectra
+variables of the data set below.
+
+```{r}
+spectraVariables(s)
+```
+
+The Metabolomics Workbench-specific variables are `"mwb_id"`, `"zip_file"` and
+`"file_name"` providing the Metabolomics Workbench ID of the data set, the zip
+file name in the FTP server and the original data file name in the Metabolomics
+Workbench for each individual spectrum.
+
+```{r}
+spectraData(s, c("mwb_id", "zip_file", "file_name"))
+basename(s$file_name) |> head()
+```
+
+The `mwb_sync()` function can be used to *synchronize* the local content of
+a `MsBackendMetabolomicsWorkbench` and is useful if, for example, locally cached
+files were deleted. The function checks if all data files of the backend are
+available locally and eventually downloads and caches missing files.
+
+```{r, echo = FALSE}
+Sys.sleep(4)
+```
+
+```{r}
+mwb_sync(s@backend)
+```
+
+In addition, it is also possible to *manually* cache and download selected files
+from Metabolomics Workbench using the `mwb_sync_data_files()` function. Before
+downloading, this function first evaluates if the respective data files are
+already cached and only downloads them if needed. As a result, the function
+returns a `data.frame` with the storage location and other information of the
+cached file(s). Below we use this function to retrieve the local storage
+information on one of the data files of the Metabolomics Workbench data set
+*ST002115*:
+
+```{r}
+res <- mwb_sync_data_files("ST002115",
+                            fileName = "HT1080_DMSO_01_RP.mzXML")
+res
+```
+
+The `mwb_cached_data_files()` function can be used to inspect and list all
+locally cached Metabolomics Workbench data files. This function does not require
+an active internet connection since only local content is queried. With the
+default settings, a `data.frame` with all available data files is returned.
+
+```{r}
+mwb_cached_data_files()
+```
+
+Locally cached files for a Metabolomics Workbench data set can be removed using
+the `mwb_delete_cache()` function providing the ID of the Metabolomics
+Workbench data set for which local data files should be removed.
+
+# General use and information retrieval from Metabolomics Workbench
+
+Next to the `MsBackendMetabolomicsWorkbench` backend for `Spectra` objects, the
+*MsBackendMetabolomicsWorkbench* package provides also various utility functions
+to query and retrieve information from Metabolomics Workbench.
+
+The `mwb_rest_request()` queries the Metabolomics Workbench REST API for a given
+study ID and output item (e.g. `summary`, `factors`). Returns the raw response
+as a `character` string in the format specified by `outputFormat` (`json` or
+`txt`).
+
+Below we query the REST API for the summary of the Metabolomics Workbench data
+set *ST002115*:
+
+```{r}
+summary <- mwb_rest_request("ST002115", outputItem = "summary",
+                            outputFormat = "json")
+fromJSON(summary)
+```
+
+The `mwb_ftp_download()` function allows to download the zip archive of the
+experiment (directly, i.e., without caching). As an example we download below
+the zip archive to a temporary folder. In our example below we do not run it to
+reduce the amount of data that needs to be downloaded.
+
+```{r, eval = FALSE}
+mwb_ftp_download("ST002115", path = tempdir())
+```
+
+# Session information
+
+```{r}
+sessionInfo()
+```
