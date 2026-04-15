@@ -6,6 +6,7 @@
 \alias{mwb_rest_request}
 \alias{mwb_ftp_list_files}
 \alias{mwb_ftp_download}
+\alias{mwb_metadata}
 \alias{mwb_sync_data_files}
 \alias{mwb_cached_data_files}
 \alias{mwb_delete_cache}
@@ -14,7 +15,8 @@
 mwb_list_files(x = character(), pattern = NULL)
 
 mwb_rest_request(
-  mwbId = character(),
+  id = character(),
+  idType = "study_id",
   outputItem = character(),
   outputFormat = "json"
 )
@@ -27,6 +29,8 @@ mwb_ftp_download(
   path = "./",
   overwrite = FALSE
 )
+
+mwb_metadata(mwbId = character())
 
 mwb_sync_data_files(
   mwbId = character(),
@@ -54,8 +58,12 @@ starting with a \emph{ST} followed by a number).}
 set (i.e., files with extension \code{"mzML"}). This parameter is passed to
 the \code{\link[=grepl]{grepl()}} function.}
 
-\item{mwbId}{\code{character(1)} with the ID of a single Metabolomics
-Workbench data set/experiment.}
+\item{id}{\code{character(1)} with the ID of a single Metabolomics Workbench data
+set/experiment.}
+
+\item{idType}{for \code{mwb_rest_request()}: \code{character(1)} defining the type of
+the ID provided in \code{id}. The accepted ID types are \code{study_id} and
+\code{analysis_id}. The default is \code{study_id}.}
 
 \item{outputItem}{for \code{mwb_rest_request()}: \code{character(1)} defining the
 metadata to retrieve from Metabolomics Workbench. To get more information
@@ -64,6 +72,9 @@ about the possible output visit the webpage
 
 \item{outputFormat}{for \code{mwb_rest_request()}: \code{character(1)} defining the
 output format of the metadata. The supported output are \code{json} and \code{txt}.}
+
+\item{mwbId}{\code{character(1)} with the ID of a single Metabolomics
+Workbench data set/experiment.}
 
 \item{path}{for \code{mwb_ftp_download()}: optional \code{character} defining the
 directory where download the files.}
@@ -92,6 +103,8 @@ body, formatted as JSON or plain text depending on \code{outputFormat}.
 local file names of the synchronized data files.
 \item For \code{mwb_ftp_list_files}: \code{character} with the files in FTP server for a
 specific ID.
+\item For \code{mwb_metadata}: \code{list} with two \code{data.frame}: one with the metadata of
+the experiment and one with the sample annotation.
 }
 }
 \description{
@@ -113,10 +126,10 @@ Parameter \code{pattern} allows to filter the results by matching against the
 \code{"sample_file"} column. This function requires an active internet
 connection.
 \item \code{mwb_rest_request()}: queries the Metabolomics Workbench REST API for
-a given study ID and output item (e.g. \code{summary}, \code{factors}).
+a given study/analysis ID and output item (e.g. \code{summary}, \code{factors}).
 Returns the raw response as a \code{character} string in the format specified
-by \code{outputFormat} (\code{json} or \code{txt}). This function requires an
-active internet connection.
+by \code{outputFormat} (\code{json} or \code{txt}). This function requires an active
+internet connection.
 \item \code{mwb_ftp_list_files()}: queries the Metabolomics Workbench FTP server for a
 given experiment ID and returns the related files. Parameter \code{pattern}
 allows to filter the results. In contrast to \code{mwb_list_files()}, this
@@ -129,6 +142,12 @@ server for a given experiment ID. Use \code{pattern} to filter files by name
 using a regular expression (by default all files are downloaded). Use
 \code{path} to set the destination directory for downloaded files. Only files
 listed by \code{mwb_ftp_list_files()} can be downloaded.
+\item \code{mwb_metadata()}: retrieves the metadata of a given MWB data set as a
+\code{list} with two \code{data.frame}: one with the metadata of the experiment and
+one with the sample annotation. The function handles the case of multiple
+analysis IDs by combining the metadata of all analysis IDs into a single
+\code{data.frame} for the experiment and a single \code{data.frame} for the sample
+annotation. This function requires an active internet connection.
 \item \code{mwb_sync_data_files()}: synchronize data files of a specified
 MWB data set eventually downloading and locally caching them.
 Parameter \code{fileName} allows to specify names of selected data files to
