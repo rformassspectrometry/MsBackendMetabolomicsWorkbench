@@ -160,18 +160,18 @@ test_that("mwb_rest_request works", {
 
     expect_error(mwb_rest_request("ST002115",
                                   idType = c("study_id","analysis_id")),
-                 "Provide a single Metabolomics Workbench ID type")
+                 "Provide a single")
 
     expect_error(mwb_rest_request("ST002115", idType = "wrong_id_type"),
-                 "Provide an accepted Metabolomics Workbench ID type")
+                 "should be one of")
 
     expect_error(mwb_rest_request("ST002115",
                                   outputItem = c("summary","factors")),
-                 "Provide a single outputItem request")
+                 "Provide a single")
 
     expect_error(mwb_rest_request("ST002115", outputItem = "summary",
                                   outputFormat = "wrongFormat"),
-                 "Wrong output format")
+                 "should be one of")
 
     expect_error(mwb_rest_request("ST002115", idType = "analysis_id",
                                   outputItem = "summary"),

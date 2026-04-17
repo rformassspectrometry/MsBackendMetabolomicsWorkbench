@@ -16,9 +16,9 @@ mwb_list_files(x = character(), pattern = NULL)
 
 mwb_rest_request(
   id = character(),
-  idType = "study_id",
+  idType = c("study_id", "analysis_id"),
   outputItem = character(),
-  outputFormat = "json"
+  outputFormat = c("json", "txt")
 )
 
 mwb_ftp_list_files(mwbId = character(), pattern = "*")
@@ -62,8 +62,8 @@ the \code{\link[=grepl]{grepl()}} function.}
 set/experiment.}
 
 \item{idType}{for \code{mwb_rest_request()}: \code{character(1)} defining the type of
-the ID provided in \code{id}. The accepted ID types are \code{study_id} and
-\code{analysis_id}. The default is \code{study_id}.}
+the ID provided in \code{id}. The accepted ID types are "study_id" and
+"analysis_id". The default is "study_id".}
 
 \item{outputItem}{for \code{mwb_rest_request()}: \code{character(1)} defining the
 metadata to retrieve from Metabolomics Workbench. To get more information
@@ -126,9 +126,9 @@ Parameter \code{pattern} allows to filter the results by matching against the
 \code{"sample_file"} column. This function requires an active internet
 connection.
 \item \code{mwb_rest_request()}: queries the Metabolomics Workbench REST API for
-a given study/analysis ID and output item (e.g. \code{summary}, \code{factors}).
+a given study/analysis ID and output item (e.g. "summary", "factors").
 Returns the raw response as a \code{character} string in the format specified
-by \code{outputFormat} (\code{json} or \code{txt}). This function requires an active
+by \code{outputFormat} ("json" or "txt"). This function requires an active
 internet connection.
 \item \code{mwb_ftp_list_files()}: queries the Metabolomics Workbench FTP server for a
 given experiment ID and returns the related files. Parameter \code{pattern}
