@@ -36,11 +36,14 @@ Imports:
     methods,
     progress,
     stringr,
+    MsCoreUtils,
+    jsonlite,
+    plyr,
+    tidyr,
     archive
 Suggests:
     testthat,
     rmarkdown,
-    jsonlite,
     mzR,
     knitr,
     BiocStyle

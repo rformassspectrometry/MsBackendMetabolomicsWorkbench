@@ -24,10 +24,10 @@
 #'   connection.
 #'
 #' - `mwb_rest_request()`: queries the Metabolomics Workbench REST API for
-#'   a given study ID and output item (e.g. `summary`, `factors`).
+#'   a given study/analysis ID and output item (e.g. `"summary"`, `"factors"`).
 #'   Returns the raw response as a `character` string in the format specified
-#'   by `outputFormat` (`json` or `txt`). This function requires an
-#'   active internet connection.
+#'   by `outputFormat` (`"json"` or `"txt"`). This function requires an active
+#'   internet connection.
 #'
 #' - `mwb_ftp_list_files()`: queries the Metabolomics Workbench FTP server for a
 #'   given experiment ID and returns the related files. Parameter `pattern`
@@ -42,6 +42,13 @@
 #'   using a regular expression (by default all files are downloaded). Use
 #'   `path` to set the destination directory for downloaded files. Only files
 #'   listed by `mwb_ftp_list_files()` can be downloaded.
+#'
+#' - `mwb_metadata()`: retrieves the metadata of a given MWB data set as a
+#'   `list` with two `data.frame`: one with the metadata of the experiment and
+#'   one with the sample annotation. The function handles the case of multiple
+#'   analysis IDs by combining the metadata of all analysis IDs into a single
+#'   `data.frame` for the experiment and a single `data.frame` for the sample
+#'   annotation. This function requires an active internet connection.
 #'
 #' - `mwb_sync_data_files()`: synchronize data files of a specified
 #'   MWB data set eventually downloading and locally caching them.
@@ -79,6 +86,9 @@
 #' @param mwbId `character(1)` with the ID of a single Metabolomics
 #'     Workbench data set/experiment.
 #'
+#' @param id `character(1)` with the ID of a single Metabolomics Workbench data
+#'    set/experiment.
+#'
 #' @param pattern for `mwb_list_files()`, `mwb_sync_data_files()`,
 #'     `mwb_cached_data_files()`, `mwb_ftp_list_files` and `mwb_ftp_download`:
 #'     `character(1)` defining a pattern to filter the file names, such as
@@ -93,6 +103,10 @@
 #' @param ftp_zip for `mwb_sync_data_files()`: `logical(1)` download the
 #'     complete zip of the experiment from the FTP server. Defaults to `FALSE`,
 #'     in which case the files are downloaded singularly via POST request.
+#'
+#' @param idType for `mwb_rest_request()`: `character(1)` defining the type of
+#'     the ID provided in `id`. The accepted ID types are `"study_id"` and
+#'     `"analysis_id"`. The default is `"study_id"`.
 #'
 #' @param outputItem for `mwb_rest_request()`: `character(1)` defining the
 #'     metadata to retrieve from Metabolomics Workbench. To get more information
@@ -121,6 +135,8 @@
 #'   local file names of the synchronized data files.
 #' - For `mwb_ftp_list_files`: `character` with the files in FTP server for a
 #'   specific ID.
+#' - For `mwb_metadata`: `list` with two `data.frame`: one with the metadata of
+#'   the experiment and one with the sample annotation.
 #'
 #' @author Gabriele Tomè, Johannes Rainer, Philippine Louail
 #'
@@ -146,6 +162,8 @@ NULL
 #'
 #' @importFrom rvest html_nodes html_attr
 #'
+#' @importFrom MsCoreUtils retry
+#'
 #' @rdname MetabolomicsWorkbench-utils
 #'
 #' @export
@@ -167,7 +185,8 @@ mwb_list_files <- function(x = character(), pattern = NULL) {
             body = params,
             encode = "form"
         ),
-        sleep_mult = .sleep_mult())
+        sleep_mult = .sleep_mult(),
+        retry_on = "resolve host name|open the connection")
     }, error = function(e) {
         stop("Failed to connect to Metabolomics Workbench. No internet
              connection? Does the data set \"", x, "\" exist?\n - ",
@@ -199,41 +218,51 @@ mwb_list_files <- function(x = character(), pattern = NULL) {
 
 #' @importFrom httr2 request req_perform resp_body_string
 #'
+#' @importFrom MsCoreUtils retry
+#'
 #' @rdname MetabolomicsWorkbench-utils
 #'
 #' @export
-mwb_rest_request <- function(mwbId = character(), outputItem = character(),
-                             outputFormat = "json") {
-    if (length(mwbId) != 1)
+mwb_rest_request <- function(id = character(),
+                             idType = c("study_id", "analysis_id"),
+                             outputItem = character(),
+                             outputFormat = c("json", "txt")) {
+    if (length(id) != 1)
         stop("Provide a single Metabolomics Workbench ID.")
+
+    idType <- match.arg(idType)
 
     if (length(outputItem) != 1)
         stop("Provide a single outputItem request.")
 
-    if (!(outputFormat %in% c("txt", "json")))
-        stop("Wrong output format. The accepted format are: 'txt', 'json'")
+    outputFormat <- match.arg(outputFormat)
 
-    url_base <- "https://www.metabolomicsworkbench.org/rest/study/study_id/"
+    url_base <- "https://www.metabolomicsworkbench.org/rest/study/"
     ## For json, MWB use empty outputFormat. For txt, add a final txt
-    rest_url <- paste0(url_base, mwbId, "/", outputItem, "/")
+    rest_url <- paste0(url_base, idType, "/", id, "/", outputItem, "/")
     if (outputFormat == "txt")
         rest_url <- paste0(rest_url, outputFormat)
 
     tryCatch({
-        response <- retry(request(rest_url) |>
-                              req_perform() |>
-                              resp_body_string(),
-                          sleep_mult = .sleep_mult())
+        response <- retry(resp_body_string(req_perform(request(rest_url))),
+                          sleep_mult = .sleep_mult(),
+                          retry_on = "resolve host name|open the connection")
     }, error = function(e) {
         stop("Failed to connect to Metabolomics Workbench. No internet
-             connection? Does the data set \"", mwbId, "\" exist?\n - ",
+             connection? Does the data set \"", id, "\" exist?\n - ",
              e$message, call. = FALSE)
     })
+
+    if (response == "[]")
+        stop("Empty response from Metabolomics Workbench. Is \"", outputItem,
+             "\" compatible with \"", idType, "\"?")
 
     response
 }
 
 #' @importFrom curl curl new_handle handle_setopt
+#'
+#' @importFrom MsCoreUtils retry
 #'
 #' @rdname MetabolomicsWorkbench-utils
 #'
@@ -249,7 +278,8 @@ mwb_ftp_list_files <- function(mwbId = character(), pattern = "*") {
     tryCatch({
         res <- retry(
             curl(url = ftp_url, "r", handle = cu),
-            sleep_mult = .sleep_mult())
+            sleep_mult = .sleep_mult(),
+            retry_on = "resolve host name|open the connection")
     }, error = function(e) {
         stop("Failed to connect to Metabolomics Workbench FTP server. ",
              "No internet connection? - ", e$message, call. = FALSE)
@@ -272,6 +302,8 @@ mwb_ftp_list_files <- function(mwbId = character(), pattern = "*") {
 #' @importFrom progress progress_bar
 #'
 #' @importFrom utils capture.output download.file
+#'
+#' @importFrom MsCoreUtils retry
 #'
 #' @rdname MetabolomicsWorkbench-utils
 #'
@@ -308,13 +340,85 @@ mwb_ftp_download <- function(mwbId = character(), pattern = "*", path = "./",
                 retry(
                     download.file(paste0(ftp_url, x),
                                   destfile = file.path(path, x), quiet = TRUE),
-                    sleep_mult = .sleep_mult()))))
+                    sleep_mult = .sleep_mult(),
+                    retry_on = "resolve host name|open the connection"))))
         }, error = function(e) {
             stop("Failed to connect to Metabolomics Workbench FTP server.",
                  "No internet connection? - ", e$message, call. = FALSE)
         })
     })
 
+}
+
+#' @importFrom plyr rbind.fill
+#'
+#' @importFrom tidyr unnest
+#'
+#' @importFrom jsonlite fromJSON
+#'
+#' @importFrom httr2 request req_perform resp_body_string
+#'
+#' @importFrom MsCoreUtils retry
+#'
+#' @rdname MetabolomicsWorkbench-utils
+#'
+#' @export
+mwb_metadata <- function(mwbId = character()) {
+    if (length(mwbId) != 1)
+        stop("Provide 1 Metabolomics Workbench ID.")
+
+    analysis_list <- fromJSON(mwb_rest_request(mwbId, outputItem = "analysis"))
+    if ("analysis_id" %in% names(analysis_list)) {
+        analysis_id_l <- analysis_list$analysis_id
+    } else {
+        analysis_id_l <- unlist(lapply(analysis_list, function(x) {
+            x$analysis_id
+        }))
+    }
+
+    meta_list <- lapply(analysis_id_l, function(id) {
+        response <- mwb_rest_request(id, idType = "analysis_id",
+                                     outputItem = "mwtab")
+
+        ## Fix duplicate keys in the JSON response
+        pattern <- '"([^"]+)"(\\s*:\\s*"[^"]*"\\s*,\\s*)"\\1"'
+        replacement <- '"\\1"\\2"\\1_2"'
+        json_string <- gsub(pattern, replacement, response)
+
+        tryCatch(meta_list <- fromJSON(json_string),
+                 error = function(e) {
+                    stop("Failed to parse JSON response for analysis ID \"",
+                        id, "\".\n - ", e$message, call. = FALSE)
+                 })
+
+        ## Data.frame with the metadata of the experiment.
+        meta_exp <- c("METABOLOMICS WORKBENCH", "PROJECT", "STUDY", "SUBJECT",
+                      "COLLECTION", "TREATMENT", "SAMPLEPREP", "CHROMATOGRAPHY",
+                      "ANALYSIS", "MS", "NM")
+        meta_list_df <- lapply(intersect(meta_exp, names(meta_list)),
+                               function(x) {as.data.frame(meta_list[[x]])})
+        ## Remove empty data.frame
+        meta_list_df <- meta_list_df[!sapply(meta_list_df, nrow) == 0]
+        exp_df <- do.call(cbind, meta_list_df)
+        ## Data.frame with the metadata of the samples.
+        df_cols <- names(which(lapply(meta_list[["SUBJECT_SAMPLE_FACTORS"]],
+                                      is.data.frame) == TRUE))
+        sample_df <- meta_list[["SUBJECT_SAMPLE_FACTORS"]] |>
+                        unnest(cols = eval(df_cols), names_sep = ": ")
+
+        meta_df <- list("MS_run" = exp_df, "sample_annotation" = sample_df)
+    })
+
+    if (length(meta_list) > 1) {
+        meta_list <- list(
+            "MS_run" = unique(do.call(rbind.fill,
+                                      lapply(meta_list, `[[`, "MS_run"))),
+            "sample_annotation" = unique(do.call(
+                rbind.fill, lapply(meta_list, `[[`, "sample_annotation"))))
+    } else {
+        meta_list <- meta_list[[1]]
+    }
+    meta_list
 }
 
 ################################################################################
@@ -423,6 +527,8 @@ mwb_cached_data_files <- function(mwbId = character(),
 #'
 #' @importFrom httr POST write_disk status_code
 #'
+#' @importFrom MsCoreUtils retry
+#'
 #' @importMethodsFrom BiocFileCache bfcnew bfcremove bfcupdate
 #'
 #' @noRd
@@ -457,7 +563,8 @@ mwb_cached_data_files <- function(mwbId = character(),
             response <- retry(POST(url, body = params, encode = "form",
                                     write_disk(cache_path,
                                                 overwrite = TRUE)),
-                            sleep_mult = .sleep_mult())
+                            sleep_mult = .sleep_mult(),
+                            retry_on = "resolve host name|open the connection")
 
             ## Remove failed POST request
             if (status_code(response) != 200) {
@@ -487,6 +594,8 @@ mwb_cached_data_files <- function(mwbId = character(),
 #' @importFrom stringr str_replace_all
 #'
 #' @importFrom archive archive_extract
+#'
+#' @importFrom MsCoreUtils retry
 #'
 #' @importMethodsFrom BiocFileCache bfcrpath bfccache bfcadd bfcremove
 #'
@@ -519,7 +628,8 @@ mwb_cached_data_files <- function(mwbId = character(),
         pb$tick()
         invisible(capture.output(suppressMessages(
             f <- retry(bfcrpath(bfc, paste0(ftp_url, z), fname = "exact"),
-                        sleep_mult = .sleep_mult()))))
+                        sleep_mult = .sleep_mult(),
+                        retry_on = "resolve host name|open the connection"))))
         res <- archive_extract(f, dir = bfccache(bfc),
                                 files = dfiles[dfiles$zip_file == z,
                                                 "sample_file"])
@@ -583,4 +693,9 @@ mwb_delete_cache <- function(mwbId = character()) {
             bfcremove(bfc, rids = rem$rid)
         }
     }
+}
+
+#' @noRd
+.sleep_mult <- function() {
+    as.integer(getOption("mwb.sleep_mult", default = 7L))
 }

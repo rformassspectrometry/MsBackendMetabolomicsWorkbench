@@ -184,9 +184,9 @@ Next to the `MsBackendMetabolomicsWorkbench` backend for `Spectra` objects, the
 to query and retrieve information from Metabolomics Workbench.
 
 The `mwb_rest_request()` queries the Metabolomics Workbench REST API for a given
-study ID and output item (e.g. `summary`, `factors`). Returns the raw response
-as a `character` string in the format specified by `outputFormat` (`json` or
-`txt`).
+study/analysis ID and output item (e.g. `summary`, `factors`). Returns the raw
+response as a `character` string in the format specified by `outputFormat`
+(`json` or `txt`).
 
 Below we query the REST API for the summary of the Metabolomics Workbench data
 set *ST002115*:
@@ -204,6 +204,26 @@ reduce the amount of data that needs to be downloaded.
 
 ```{r, eval = FALSE}
 mwb_ftp_download("ST002115", path = tempdir())
+```
+
+The `mwb_metadata()` function retrieves the metadata of a given Metabolomics
+Workbench data set as a `list` of 2 `data.frame`:
+    - `MS_run`: contains the metadata of the MS runs of the data set, identified
+      by the analysis ID(s),
+    - `sample_annotation`: contains the metadata of the samples of the data set.
+      Not all the experiments have a column with the associated sample file
+      name, the association cab be retrieved by the `mwb_list_files()` function.
+
+The function handles the case of multiple analysis IDs by combining the metadata
+of all analysis IDs into a single `data.frame` for the experiment and a single
+`data.frame` for the sample annotation.
+
+Below we retrieve the metadata of the data set *ST002115*:
+
+```{r}
+meta <- mwb_metadata("ST002115")
+meta$MS_run
+meta$sample_annotation
 ```
 
 # Session information

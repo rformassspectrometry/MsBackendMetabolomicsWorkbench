@@ -159,12 +159,23 @@ test_that("mwb_rest_request works", {
                  "Provide a single Metabolomics Workbench ID")
 
     expect_error(mwb_rest_request("ST002115",
+                                  idType = c("study_id","analysis_id")),
+                 "Provide a single")
+
+    expect_error(mwb_rest_request("ST002115", idType = "wrong_id_type"),
+                 "should be one of")
+
+    expect_error(mwb_rest_request("ST002115",
                                   outputItem = c("summary","factors")),
-                 "Provide a single outputItem request")
+                 "Provide a single")
 
     expect_error(mwb_rest_request("ST002115", outputItem = "summary",
                                   outputFormat = "wrongFormat"),
-                 "Wrong output format")
+                 "should be one of")
+
+    expect_error(mwb_rest_request("ST002115", idType = "analysis_id",
+                                  outputItem = "summary"),
+                 "Is \"summary\" compatible with \"analysis_id\"?")
 
     ## simulate connection error and assert custom message
     with_mocked_bindings(
@@ -252,4 +263,28 @@ test_that("mwb_ftp_download works", {
     mtime_overwritten <- file.info(
         file.path(tmp, "ST000909_AN001476_Results.txt"))$mtime
     expect_true(mtime_overwritten > mtime_before)
+})
+
+test_that("mwb_metadata works", {
+    expect_error(mwb_metadata(c("ST002115","ST000016")),
+                 "Provide 1 Metabolomics Workbench ID")
+
+    with_mocked_bindings(
+        "request" = function(...) stop("request failed"),
+        expect_error(
+            mwb_metadata("ST002115"),
+            "Failed to connect to Metabolomics Workbench"
+        )
+    )
+
+    expect_error(mwb_metadata("ST003302"), "Failed to parse JSON")
+
+    res <- mwb_metadata("ST002115")
+    expect_true(is.list(res))
+    expect_true(all(c("MS_run", "sample_annotation") %in%
+                    names(res)))
+})
+
+test_that(".sleep_mult works", {
+    expect_equal(.sleep_mult(), 7L)
 })
