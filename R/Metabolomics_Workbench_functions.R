@@ -24,9 +24,9 @@
 #'   connection.
 #'
 #' - `mwb_rest_request()`: queries the Metabolomics Workbench REST API for
-#'   a given study/analysis ID and output item (e.g. "summary", "factors").
+#'   a given study/analysis ID and output item (e.g. `"summary"`, `"factors"`).
 #'   Returns the raw response as a `character` string in the format specified
-#'   by `outputFormat` ("json" or "txt"). This function requires an active
+#'   by `outputFormat` (`"json"` or `"txt"`). This function requires an active
 #'   internet connection.
 #'
 #' - `mwb_ftp_list_files()`: queries the Metabolomics Workbench FTP server for a
@@ -105,8 +105,8 @@
 #'     in which case the files are downloaded singularly via POST request.
 #'
 #' @param idType for `mwb_rest_request()`: `character(1)` defining the type of
-#'     the ID provided in `id`. The accepted ID types are "study_id" and
-#'     "analysis_id". The default is "study_id".
+#'     the ID provided in `id`. The accepted ID types are `"study_id"` and
+#'     `"analysis_id"`. The default is `"study_id"`.
 #'
 #' @param outputItem for `mwb_rest_request()`: `character(1)` defining the
 #'     metadata to retrieve from Metabolomics Workbench. To get more information
