@@ -72,10 +72,20 @@ test_that(".mwb_data_files and .mwb_data_files_offline works", {
     expect_true(nrow(g) == 4)
     expect_true(all(g$mwb_id == "ST002115"))
     expect_equal(d$rpath, g$rpath)
+
+    ## Simulate POST providing no files
+    with_mocked_bindings(
+        ".mwb_data_files_post" = function(...) return(list(lfiles = NULL,
+                                                           dfiles = NULL)),
+        expect_error(
+            .mwb_data_files("ST004675", pattern = "-3-pos.mzML$",
+                            ftp_zip = FALSE),
+            "Failed to connect to Metabolomics Workbench"
+        )
+    )
 })
 
 test_that(".mwb_data_files_ftp works", {
-    expect_error(mwb_list_files(), "Provide a single")
     dfiles <- mwb_list_files(x = "ST002115", pattern = "01_RP.mzXML$")
     bfc <- BiocFileCache()
 
@@ -101,6 +111,13 @@ test_that(".mwb_data_files_post works", {
                                       fileName = "nonexistentpattern",
                                       bfc = bfc),
                  "None of the 'fileName'")
+
+    ## Simulate POST providing status code 400
+    dfiles_error = data.frame("zip_file" = "notexist",
+                              "sample_file" = "notexist")
+    res_post <- .mwb_data_files_post(mwbId = "ST002115",
+                                     dfiles = dfiles_error, bfc = bfc)
+    expect_true(nrow(dfiles_error) != nrow(res_post$dfiles))
 
     res <- .mwb_data_files_post(mwbId = "ST002115", dfiles = dfiles, bfc = bfc)
     expect_true(is.list(res))
@@ -189,6 +206,9 @@ test_that("mwb_rest_request works", {
     res <- mwb_rest_request("ST002115", outputItem = "summary")
     expect_true(jsonlite::validate(res))
 
+    res <- mwb_rest_request("ST002115", outputItem = "summary",
+                            outputFormat = "txt")
+    expect_true(is.character(res))
 })
 
 test_that("mwb_ftp_list_files works", {
@@ -279,10 +299,16 @@ test_that("mwb_metadata works", {
 
     expect_error(mwb_metadata("ST003302"), "Failed to parse JSON")
 
+    ## Test with multple analysis IDs
     res <- mwb_metadata("ST002115")
     expect_true(is.list(res))
-    expect_true(all(c("MS_run", "sample_annotation") %in%
-                    names(res)))
+    expect_true(all(c("MS_run", "sample_annotation") %in% names(res)))
+
+    ## Test with single analysis ID
+    res <- mwb_metadata("ST002610")
+    expect_true(is.list(res))
+    expect_true(all(c("MS_run", "sample_annotation") %in% names(res)))
+
 })
 
 test_that(".sleep_mult works", {

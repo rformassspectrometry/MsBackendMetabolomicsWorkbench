@@ -1,5 +1,12 @@
 # MsBackendMetabolomicsWorkbench 0.1
 
+## Changes in 0.1.4
+
+- Handle encoded sample filenames.
+- Improve the managing of POST failures.
+- Centralize retry pattern.
+- Expand tests.
+
 ## Changes in 0.1.3
 
 - Add vignette.

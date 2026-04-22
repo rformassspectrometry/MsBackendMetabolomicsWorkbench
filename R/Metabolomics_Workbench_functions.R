@@ -186,7 +186,7 @@ mwb_list_files <- function(x = character(), pattern = NULL) {
             encode = "form"
         ),
         sleep_mult = .sleep_mult(),
-        retry_on = "resolve host name|open the connection")
+        retry_on = .RETRY_ON_PATTERN)
     }, error = function(e) {
         stop("Failed to connect to Metabolomics Workbench. No internet
              connection? Does the data set \"", x, "\" exist?\n - ",
@@ -246,7 +246,7 @@ mwb_rest_request <- function(id = character(),
     tryCatch({
         response <- retry(resp_body_string(req_perform(request(rest_url))),
                           sleep_mult = .sleep_mult(),
-                          retry_on = "resolve host name|open the connection")
+                          retry_on = .RETRY_ON_PATTERN)
     }, error = function(e) {
         stop("Failed to connect to Metabolomics Workbench. No internet
              connection? Does the data set \"", id, "\" exist?\n - ",
@@ -279,7 +279,7 @@ mwb_ftp_list_files <- function(mwbId = character(), pattern = "*") {
         res <- retry(
             curl(url = ftp_url, "r", handle = cu),
             sleep_mult = .sleep_mult(),
-            retry_on = "resolve host name|open the connection")
+            retry_on = .RETRY_ON_PATTERN)
     }, error = function(e) {
         stop("Failed to connect to Metabolomics Workbench FTP server. ",
              "No internet connection? - ", e$message, call. = FALSE)
@@ -341,7 +341,7 @@ mwb_ftp_download <- function(mwbId = character(), pattern = "*", path = "./",
                     download.file(paste0(ftp_url, x),
                                   destfile = file.path(path, x), quiet = TRUE),
                     sleep_mult = .sleep_mult(),
-                    retry_on = "resolve host name|open the connection"))))
+                    retry_on = .RETRY_ON_PATTERN))))
         }, error = function(e) {
             stop("Failed to connect to Metabolomics Workbench FTP server.",
                  "No internet connection? - ", e$message, call. = FALSE)
@@ -534,8 +534,24 @@ mwb_cached_data_files <- function(mwbId = character(),
 #' @noRd
 .mwb_data_files_post <- function(mwbId = character(), dfiles = NULL,
                                  fileName = character(), bfc = NULL) {
+    ## Substitute the "+" with the real value " "
+    if(any(grepl("+", dfiles$sample_file))) {
+        dfiles$parsed_name <- basename(str_replace_all(dfiles$sample_file,
+                                                        "\\+", " "))
+    } else {
+        dfiles$parsed_name <- basename(dfiles$sample_file)
+    }
+
+    ## Substitute the "%2F" with the real value "/"
+    if(any(grepl("%2F", dfiles$sample_file))){
+        dfiles$parsed_name <- basename(str_replace_all(dfiles$sample_file,
+                                                        "%2F", "/"))
+    } else{
+        dfiles$parsed_name <- basename(dfiles$sample_file)
+    }
+
     if (length(fileName)) {
-        keep <- basename(dfiles$sample_file) %in% fileName
+        keep <- basename(dfiles$parsed_name) %in% fileName
         if (!any(keep))
             stop("None of the 'fileName' found in data set \"", mwbId, "\"")
         dfiles <- dfiles[keep, ]
@@ -557,21 +573,25 @@ mwb_cached_data_files <- function(mwbId = character(),
         )
 
         ## Submit POST request and save directly to cache path
-        cache_path <- bfcnew(bfc, sample_file, fname = "exact")
+        cache_path <- bfcnew(bfc, dfiles[dfiles$sample_file == sample_file,
+                                         "parsed_name"], fname = "exact")
 
         invisible({
             response <- retry(POST(url, body = params, encode = "form",
                                     write_disk(cache_path,
                                                 overwrite = TRUE)),
                             sleep_mult = .sleep_mult(),
-                            retry_on = "resolve host name|open the connection")
+                            retry_on = .RETRY_ON_PATTERN)
 
             ## Remove failed POST request
-            if (status_code(response) != 200) {
+            if (!length(content(response)) ||
+                    status_code(response) != 200) {
                 bfcremove(bfc, names(cache_path))
                 dfiles <- dfiles[dfiles$sample_file != sample_file, ]
             } else {
-                rpath_update <- file.path(dirname(cache_path), sample_file)
+                rpath_update <- file.path(dirname(cache_path),
+                                    dfiles[dfiles$sample_file == sample_file,
+                                           "parsed_name"])
                 file.rename(cache_path, rpath_update)
                 suppressWarnings(bfcupdate(bfc, names(cache_path),
                                             rpath = rpath_update))
@@ -580,6 +600,11 @@ mwb_cached_data_files <- function(mwbId = character(),
                 lfiles <- c(lfiles, rpath_update)
             }
         })
+    }
+
+    if("parsed_name" %in% names(dfiles)) {
+      dfiles$sample_file <- dfiles$parsed_name
+      dfiles$parsed_name <- NULL
     }
 
     res <- list("lfiles" = lfiles, "dfiles" = dfiles)
@@ -629,7 +654,7 @@ mwb_cached_data_files <- function(mwbId = character(),
         invisible(capture.output(suppressMessages(
             f <- retry(bfcrpath(bfc, paste0(ftp_url, z), fname = "exact"),
                         sleep_mult = .sleep_mult(),
-                        retry_on = "resolve host name|open the connection"))))
+                        retry_on = .RETRY_ON_PATTERN))))
         res <- archive_extract(f, dir = bfccache(bfc),
                                 files = dfiles[dfiles$zip_file == z,
                                                 "sample_file"])
@@ -699,3 +724,7 @@ mwb_delete_cache <- function(mwbId = character()) {
 .sleep_mult <- function() {
     as.integer(getOption("mwb.sleep_mult", default = 7L))
 }
+
+## "resolve"    missing internet connection
+## "connection" server not reachable
+.RETRY_ON_PATTERN <- "resolve|connection"
