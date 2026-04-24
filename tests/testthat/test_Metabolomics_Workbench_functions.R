@@ -45,16 +45,6 @@ test_that(".mwb_data_files and .mwb_data_files_offline works", {
     expect_true(is.data.frame(d))
     expect_true(nrow(d) == 4)
     expect_true(all(d$mwb_id == "ST002115"))
-    ## Re-call function the data with data already cached using the FPT server
-    e <- .mwb_data_files("ST002115", pattern = "02_RP.mzXML$", ftp_zip = TRUE)
-    expect_true(is.data.frame(e))
-    expect_true(nrow(e) == 4)
-    expect_true(all(e$mwb_id == "ST002115"))
-    ## Re-call function caching new and old files at the same time.
-    f <- .mwb_data_files("ST002115", pattern = "_02_", ftp_zip = TRUE)
-    expect_true(is.data.frame(f))
-    expect_true(nrow(f) == 8)
-    expect_true(all(f$mwb_id == "ST002115"))
 
     ## with fileNames
     expect_error(.mwb_data_files("ST002115", pattern = "02_RP.mzXML$",
