@@ -70,7 +70,7 @@ of California San Diego.
 The repository provides access to study metadata, processed experimental
 results, metabolite structures, and reference compound information through a
 RESTful HTTP API / FTP server / POST request. The backend directly extends
-the \link[Spectra:MsBackend]{Spectra::MsBackendMzR} backend from the \emph{Spectra} package and hence
+the \link[Spectra:MsBackendMzR]{Spectra::MsBackendMzR} backend from the \emph{Spectra} package and hence
 supports MS data in mzML, CDF, and mzXML format. Data in other formats cannot
 be loaded with \code{MsBackendMetabolomicsWorkbench}. Upon initialization with the
 \code{backendInitialize()} method, the \code{MsBackendMetabolomicsWorkbench} backend
