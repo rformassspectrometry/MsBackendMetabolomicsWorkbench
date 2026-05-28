@@ -496,7 +496,7 @@ mwb_cached_data_files <- function(mwbId = character(),
     }
 
     ## Substitute the "+" with the real value " "
-    if(any(grepl("+", dfiles$sample_file))) {
+    if(any(grepl("\\+", dfiles$sample_file))) {
         dfiles$parsed_name <- basename(str_replace_all(dfiles$sample_file,
                                                         "\\+", " "))
     } else {
@@ -557,7 +557,7 @@ mwb_cached_data_files <- function(mwbId = character(),
             mwb_id = mwbId,
             zip_file = dfiles$zip_file,
             file_name = dfiles$sample_file)
-        bfcmeta(bfc, name = "MWB", append = TRUE) <- mdata
+        bfcmeta(bfc, name = "MWB", overwrite = TRUE) <- mdata
         mdata$rpath <- lfiles
     }
     if (nrow(res_cached) != length(res_to_download)) {
@@ -587,15 +587,19 @@ mwb_cached_data_files <- function(mwbId = character(),
                                             ":elapsed"),
                             total = nrow(dfiles), clear = FALSE)
 
-    url <- "https://metabolomicsworkbench.org/data/file_extract_7z.php"
     lfiles <- c()
     for (i in seq_len(nrow(dfiles))) {
-    ## for (sample_file in dfiles$sample_file) {
         pb$tick()
         params <- list(
             A = paste0(dfiles[i, "zip_file"]),
             F = paste0(dfiles[i, "sample_file"])
         )
+        if(endsWith(params$A, ".tar.gz")) {
+            url <- paste0("https://metabolomicsworkbench.org/data/",
+                          "file_extract_targz1.php")
+        } else {
+            url <- "https://metabolomicsworkbench.org/data/file_extract_7z.php"
+        }
 
         ## Submit POST request and save directly to cache path
         cache_path <- bfcnew(bfc, dfiles[i, "parsed_name"], fname = "exact")

@@ -17,10 +17,14 @@ test_that(".mwb_data_files and .mwb_data_files_offline works", {
     ## Error if no cache available
     with_mocked_bindings(
         ".mwb_has_mwb_table" = function() FALSE,
-        code = expect_error(.mwb_data_files_offline("ST002115"),
+        expect_error(.mwb_data_files_offline("ST002115"),
                             "No local Metabolomics Workbench cache")
     )
 
+    with_mocked_bindings(
+        ".mwb_has_mwb_table" = function() FALSE,
+        expect_no_error(.mwb_data_files("ST002115", pattern = "01_RP.mzXML$"))
+    )
     ## Cache the data: Will use a specific pattern to just load 4 files.
     a <- .mwb_data_files("ST002115", pattern = "01_RP.mzXML$")
     expect_true(is.data.frame(a))
@@ -78,11 +82,6 @@ test_that(".mwb_data_files and .mwb_data_files_offline works", {
 test_that(".mwb_data_files_ftp works", {
     dfiles <- mwb_list_files(x = "ST002115", pattern = "01_RP.mzXML$")
     bfc <- BiocFileCache()
-
-    expect_error(.mwb_data_files_ftp(mwbId = "ST002115", dfiles = dfiles,
-                                    fileName = "nonexistentpattern", bfc = bfc),
-                 "None of the 'fileName'")
-
     res <- .mwb_data_files_ftp(mwbId = "ST002115", dfiles = dfiles, bfc = bfc)
     expect_true(is.list(res))
 
@@ -91,20 +90,23 @@ test_that(".mwb_data_files_ftp works", {
     expect_true(length(lfiles) == 4)
     expect_true(is.data.frame(dfiles))
     expect_true(nrow(dfiles) == 4)
+
+    ## Example with files in subfolder and white spaces in the file name
+    dfiles <- mwb_list_files(x = "ST004675", pattern = "-Cre-3-neg.mzML$")
+    bfc <- BiocFileCache()
+    res <- .mwb_data_files_ftp(mwbId = "ST004675", dfiles = dfiles, bfc = bfc)
+    expect_true(is.list(res))
 })
 
 test_that(".mwb_data_files_post works", {
     dfiles <- mwb_list_files(x = "ST002115", pattern = "01_RP.mzXML$")
+    dfiles$parsed_name <- basename(dfiles$sample_file)
     bfc <- BiocFileCache()
-
-    expect_error(.mwb_data_files_post(mwbId = "ST002115", dfiles = dfiles,
-                                      fileName = "nonexistentpattern",
-                                      bfc = bfc),
-                 "None of the 'fileName'")
 
     ## Simulate POST providing status code 400
     dfiles_error = data.frame("zip_file" = "notexist",
-                              "sample_file" = "notexist")
+                              "sample_file" = "notexist",
+                              "parsed_name" = "notexist")
     res_post <- .mwb_data_files_post(mwbId = "ST002115",
                                      dfiles = dfiles_error, bfc = bfc)
     expect_true(nrow(dfiles_error) != nrow(res_post$dfiles))
