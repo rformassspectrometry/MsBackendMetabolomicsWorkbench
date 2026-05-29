@@ -4,8 +4,11 @@
 
 - Handle encoded sample filenames.
 - Improve the managing of POST failures.
+- Improve the handling of cached files.
+- Add the POST request for .tar.gz archive.
 - Centralize retry pattern.
 - Expand tests.
+- Add GHA.
 
 ## Changes in 0.1.3
 

@@ -481,6 +481,8 @@ mwb_cached_data_files <- function(mwbId = character(),
 #'
 #' @importFrom httr POST write_disk status_code
 #'
+#' @importFrom utils URLdecode
+#'
 #' @importMethodsFrom BiocFileCache bfcnew bfcmeta<- bfcremove bfcupdate
 #'
 #' @importMethodsFrom BiocFileCache bfcrpath bfccache bfcadd
@@ -495,25 +497,12 @@ mwb_cached_data_files <- function(mwbId = character(),
                 "Metabolomics Workbench data set ", mwbId, ".", call. = FALSE)
     }
 
-    ## Substitute the "+" with the real value " "
-    if(any(grepl("\\+", dfiles$sample_file))) {
-        dfiles$parsed_name <- basename(str_replace_all(dfiles$sample_file,
-                                                        "\\+", " "))
-    } else {
-        dfiles$parsed_name <- basename(dfiles$sample_file)
-    }
-    ## Substitute the "%2F" with the real value "/"
-    if(any(grepl("%2F", dfiles$sample_file))){
-        dfiles$parsed_name <- basename(str_replace_all(dfiles$sample_file,
-                                                        "%2F", "/"))
-    } else{
-        dfiles$parsed_name <- basename(dfiles$sample_file)
-    }
+    dfiles$parsed_name <- basename(URLdecode(gsub("\\+", "%20",
+                                                  dfiles$sample_file)))
 
     ## Filter by fileName
     if (length(fileName)) {
-        fileName_parsed <- str_replace_all(fileName, " ", "\\+")
-        fileName_parsed <- str_replace_all(fileName_parsed, "/", "%2F")
+        fileName_parsed <- URLdecode(gsub("\\+", "%20", fileName))
         keep <- dfiles$parsed_name %in% fileName |
                     dfiles$parsed_name %in% fileName_parsed
         if (!any(keep))
@@ -650,19 +639,14 @@ mwb_cached_data_files <- function(mwbId = character(),
 #'
 #' @importFrom MsCoreUtils retry
 #'
+#' @importFrom utils URLdecode
+#'
 #' @importMethodsFrom BiocFileCache bfcrpath bfccache bfcadd bfcremove
 #'
 #' @noRd
 .mwb_data_files_ftp <- function(mwbId = character(), dfiles = NULL,
                                 bfc = NULL) {
-    ## Substitute the "+" with the real value " "
-    if(any(grepl("+", dfiles$sample_file)))
-        dfiles$sample_file <- str_replace_all(dfiles$sample_file,
-                                                "\\+", " ")
-    ## Substitute the "%2F" with the real value "/"
-    if(any(grepl("%2F", dfiles$sample_file)))
-        dfiles$sample_file <- str_replace_all(dfiles$sample_file,
-                                                "%2F", "/")
+    dfiles$sample_file <- URLdecode(gsub("\\+", "%20", dfiles$sample_file))
 
     ## Cache files
     zip_files <- unique(dfiles$zip_file)

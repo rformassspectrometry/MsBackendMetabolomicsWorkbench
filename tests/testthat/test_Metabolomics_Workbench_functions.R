@@ -119,6 +119,20 @@ test_that(".mwb_data_files_post works", {
     expect_true(length(lfiles) == 4)
     expect_true(is.data.frame(dfiles))
     expect_true(nrow(dfiles) == 4)
+
+    ## Test .tar.gz extractor
+    dfiles <- mwb_list_files(x = "ST001357", pattern = "124.mzML$")
+    dfiles$parsed_name <- basename(URLdecode(gsub("\\+", "%20",
+                                                    dfiles$sample_file)))
+    bfc <- BiocFileCache()
+    res <- .mwb_data_files_post(mwbId = "ST001357", dfiles = dfiles, bfc = bfc)
+    expect_true(is.list(res))
+
+    lfiles <- res$lfiles
+    dfiles <- res$dfiles
+    expect_true(length(lfiles) == 1)
+    expect_true(is.data.frame(dfiles))
+    expect_true(nrow(dfiles) == 1)
 })
 
 test_that("mwb_sync_data_files works", {
