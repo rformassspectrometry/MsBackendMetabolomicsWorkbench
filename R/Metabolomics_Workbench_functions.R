@@ -661,7 +661,7 @@ mwb_cached_data_files <- function(mwbId = character(),
                                 files = dfiles[dfiles$zip_file == z,
                                                 "sample_file"])
         res_f <- bfcadd(bfc, paste0(bfccache(bfc), "/", res),
-                        fname = "exact")
+                        fname = "exact", action = "move")
         bfcremove(bfc, rids = names(f))
 
         dfiles <- data.frame("zip_file" = z,
