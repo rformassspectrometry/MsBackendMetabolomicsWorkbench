@@ -158,7 +158,7 @@
 #' ## Download the file with: `mwb_ftp_download("ST002115", path = tempdir())`
 NULL
 
-#' @importFrom httr POST content
+#' @importFrom httr2 request req_url_query req_perform resp_body_html
 #'
 #' @importFrom rvest html_nodes html_attr
 #'
@@ -168,32 +168,28 @@ NULL
 #'
 #' @export
 mwb_list_files <- function(x = character(), pattern = NULL) {
-    if(length(x) != 1)
+    if (length(x) != 1)
         stop("Provide a single Metabolomics Workbench ID.")
 
-    # MWB lisf files function
     url <- paste0("https://metabolomicsworkbench.org/data/",
                   "show_archive_contents_link.php")
-    params <- list(
-        STUDY_ID = x
-    )
+    params <- list(STUDY_ID = x)
 
     ## Submit the POST request and save the response to a file
     tryCatch({
-        res <- retry(POST(
-            url,
-            body = params,
-            encode = "form"
-        ),
-        sleep_mult = .sleep_mult(),
-        retry_on = .RETRY_ON_PATTERN)
+        res <- retry(
+            req_perform(
+                request(url) |> req_url_query(!!!params)
+            ),
+            sleep_mult = .sleep_mult(),
+            retry_on = .RETRY_ON_PATTERN)
     }, error = function(e) {
         stop("Failed to connect to Metabolomics Workbench. No internet
              connection? Does the data set \"", x, "\" exist?\n - ",
              e$message, call. = FALSE)
     })
 
-    webpage <- content(res)
+    webpage <- resp_body_html(res)
     zip_file <- webpage |>
         html_nodes("input[name='A']") |>
         html_attr("value")
@@ -205,7 +201,7 @@ mwb_list_files <- function(x = character(), pattern = NULL) {
     anno_df <- unique(data.frame("zip_file" = zip_file,
                                  "sample_file" = sample_file))
 
-    if(nrow(anno_df) == 0)
+    if (nrow(anno_df) == 0)
         stop("Failed to retrieve info from Metabolomics Workbench. Does the
              data set \"", x, "\" exist? Does the data set \"", x, "\" contain
              files?")
@@ -479,13 +475,9 @@ mwb_cached_data_files <- function(mwbId = character(),
 #'
 #' @importFrom BiocFileCache BiocFileCache
 #'
-#' @importFrom httr POST write_disk status_code
-#'
 #' @importFrom utils URLdecode
 #'
-#' @importMethodsFrom BiocFileCache bfcnew bfcmeta<- bfcremove bfcupdate
-#'
-#' @importMethodsFrom BiocFileCache bfcrpath bfccache bfcadd
+#' @importMethodsFrom BiocFileCache bfcmeta<-
 #'
 #' @noRd
 .mwb_data_files <- function(mwbId = character(),
@@ -561,7 +553,7 @@ mwb_cached_data_files <- function(mwbId = character(),
 #' Download and cache data files for a given MWB ID via POST request. This
 #' function is used by `.mwb_data_files()` when `ftp_zip = FALSE`.
 #'
-#' @importFrom httr POST write_disk status_code
+#' @importFrom httr2 request req_perform req_body_form resp_status
 #'
 #' @importFrom MsCoreUtils retry
 #'
@@ -583,7 +575,7 @@ mwb_cached_data_files <- function(mwbId = character(),
             A = paste0(dfiles[i, "zip_file"]),
             F = paste0(dfiles[i, "sample_file"])
         )
-        if(endsWith(params$A, ".tar.gz")) {
+        if (endsWith(params$A, ".tar.gz")) {
             url <- paste0("https://metabolomicsworkbench.org/data/",
                           "file_extract_targz1.php")
         } else {
@@ -592,17 +584,21 @@ mwb_cached_data_files <- function(mwbId = character(),
 
         ## Submit POST request and save directly to cache path
         cache_path <- bfcnew(bfc, dfiles[i, "parsed_name"], fname = "exact")
+        if (file.exists(cache_path))
+            file.remove(cache_path)
 
         invisible({
-            response <- retry(POST(url, body = params, encode = "form",
-                                    write_disk(cache_path,
-                                                overwrite = TRUE)),
-                            sleep_mult = .sleep_mult(),
-                            retry_on = .RETRY_ON_PATTERN)
+            response <- retry(
+                request(url) |>
+                    req_body_form(!!!params) |>
+                    req_perform(path = cache_path),
+                sleep_mult = .sleep_mult(),
+                retry_on = .RETRY_ON_PATTERN)
 
             ## Remove failed POST request
-            if (!length(content(response)) ||
-                    status_code(response) != 200) {
+            if (resp_status(response) != 200 ||
+                    !file.exists(cache_path) ||
+                    file.info(cache_path)$size == 0) {
                 bfcremove(bfc, names(cache_path))
                 dfiles <- dfiles[dfiles[, "sample_file"] != dfiles[i,
                                                                 "sample_file"],]
@@ -619,9 +615,9 @@ mwb_cached_data_files <- function(mwbId = character(),
         })
     }
 
-    if("parsed_name" %in% names(dfiles)) {
-      dfiles$sample_file <- dfiles$parsed_name
-      dfiles$parsed_name <- NULL
+    if ("parsed_name" %in% names(dfiles)) {
+        dfiles$sample_file <- dfiles$parsed_name
+        dfiles$parsed_name <- NULL
     }
 
     res <- list("lfiles" = lfiles, "dfiles" = dfiles)

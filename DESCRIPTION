@@ -27,7 +27,6 @@ Depends:
     Spectra (>= 1.15.12)
 Imports:
     rvest,
-    httr,
     httr2,
     curl,
     ProtGenerics,
