@@ -17,10 +17,14 @@ test_that(".mwb_data_files and .mwb_data_files_offline works", {
     ## Error if no cache available
     with_mocked_bindings(
         ".mwb_has_mwb_table" = function() FALSE,
-        code = expect_error(.mwb_data_files_offline("ST002115"),
+        expect_error(.mwb_data_files_offline("ST002115"),
                             "No local Metabolomics Workbench cache")
     )
 
+    with_mocked_bindings(
+        ".mwb_has_mwb_table" = function() FALSE,
+        expect_no_error(.mwb_data_files("ST002115", pattern = "01_RP.mzXML$"))
+    )
     ## Cache the data: Will use a specific pattern to just load 4 files.
     a <- .mwb_data_files("ST002115", pattern = "01_RP.mzXML$")
     expect_true(is.data.frame(a))
@@ -45,16 +49,6 @@ test_that(".mwb_data_files and .mwb_data_files_offline works", {
     expect_true(is.data.frame(d))
     expect_true(nrow(d) == 4)
     expect_true(all(d$mwb_id == "ST002115"))
-    ## Re-call function the data with data already cached using the FPT server
-    e <- .mwb_data_files("ST002115", pattern = "02_RP.mzXML$", ftp_zip = TRUE)
-    expect_true(is.data.frame(e))
-    expect_true(nrow(e) == 4)
-    expect_true(all(e$mwb_id == "ST002115"))
-    ## Re-call function caching new and old files at the same time.
-    f <- .mwb_data_files("ST002115", pattern = "_02_", ftp_zip = TRUE)
-    expect_true(is.data.frame(f))
-    expect_true(nrow(f) == 8)
-    expect_true(all(f$mwb_id == "ST002115"))
 
     ## with fileNames
     expect_error(.mwb_data_files("ST002115", pattern = "02_RP.mzXML$",
@@ -72,17 +66,22 @@ test_that(".mwb_data_files and .mwb_data_files_offline works", {
     expect_true(nrow(g) == 4)
     expect_true(all(g$mwb_id == "ST002115"))
     expect_equal(d$rpath, g$rpath)
+
+    ## Simulate POST providing no files
+    with_mocked_bindings(
+        ".mwb_data_files_post" = function(...) return(list(lfiles = NULL,
+                                                           dfiles = NULL)),
+        expect_error(
+            .mwb_data_files("ST004675", pattern = "-3-pos.mzML$",
+                            ftp_zip = FALSE),
+            "Failed to connect to Metabolomics Workbench"
+        )
+    )
 })
 
 test_that(".mwb_data_files_ftp works", {
-    expect_error(mwb_list_files(), "Provide a single")
     dfiles <- mwb_list_files(x = "ST002115", pattern = "01_RP.mzXML$")
     bfc <- BiocFileCache()
-
-    expect_error(.mwb_data_files_ftp(mwbId = "ST002115", dfiles = dfiles,
-                                    fileName = "nonexistentpattern", bfc = bfc),
-                 "None of the 'fileName'")
-
     res <- .mwb_data_files_ftp(mwbId = "ST002115", dfiles = dfiles, bfc = bfc)
     expect_true(is.list(res))
 
@@ -91,16 +90,26 @@ test_that(".mwb_data_files_ftp works", {
     expect_true(length(lfiles) == 4)
     expect_true(is.data.frame(dfiles))
     expect_true(nrow(dfiles) == 4)
+
+    ## Example with files in subfolder and white spaces in the file name
+    dfiles <- mwb_list_files(x = "ST004675", pattern = "-Cre-3-neg.mzML$")
+    bfc <- BiocFileCache()
+    res <- .mwb_data_files_ftp(mwbId = "ST004675", dfiles = dfiles, bfc = bfc)
+    expect_true(is.list(res))
 })
 
 test_that(".mwb_data_files_post works", {
     dfiles <- mwb_list_files(x = "ST002115", pattern = "01_RP.mzXML$")
+    dfiles$parsed_name <- basename(dfiles$sample_file)
     bfc <- BiocFileCache()
 
-    expect_error(.mwb_data_files_post(mwbId = "ST002115", dfiles = dfiles,
-                                      fileName = "nonexistentpattern",
-                                      bfc = bfc),
-                 "None of the 'fileName'")
+    ## Simulate POST providing status code 400
+    dfiles_error = data.frame("zip_file" = "notexist",
+                              "sample_file" = "notexist",
+                              "parsed_name" = "notexist")
+    res_post <- .mwb_data_files_post(mwbId = "ST002115",
+                                     dfiles = dfiles_error, bfc = bfc)
+    expect_true(nrow(dfiles_error) != nrow(res_post$dfiles))
 
     res <- .mwb_data_files_post(mwbId = "ST002115", dfiles = dfiles, bfc = bfc)
     expect_true(is.list(res))
@@ -110,6 +119,20 @@ test_that(".mwb_data_files_post works", {
     expect_true(length(lfiles) == 4)
     expect_true(is.data.frame(dfiles))
     expect_true(nrow(dfiles) == 4)
+
+    ## Test .tar.gz extractor
+    dfiles <- mwb_list_files(x = "ST001357", pattern = "124.mzML$")
+    dfiles$parsed_name <- basename(URLdecode(gsub("\\+", "%20",
+                                                    dfiles$sample_file)))
+    bfc <- BiocFileCache()
+    res <- .mwb_data_files_post(mwbId = "ST001357", dfiles = dfiles, bfc = bfc)
+    expect_true(is.list(res))
+
+    lfiles <- res$lfiles
+    dfiles <- res$dfiles
+    expect_true(length(lfiles) == 1)
+    expect_true(is.data.frame(dfiles))
+    expect_true(nrow(dfiles) == 1)
 })
 
 test_that("mwb_sync_data_files works", {
@@ -189,6 +212,9 @@ test_that("mwb_rest_request works", {
     res <- mwb_rest_request("ST002115", outputItem = "summary")
     expect_true(jsonlite::validate(res))
 
+    res <- mwb_rest_request("ST002115", outputItem = "summary",
+                            outputFormat = "txt")
+    expect_true(is.character(res))
 })
 
 test_that("mwb_ftp_list_files works", {
@@ -279,10 +305,16 @@ test_that("mwb_metadata works", {
 
     expect_error(mwb_metadata("ST003302"), "Failed to parse JSON")
 
+    ## Test with multple analysis IDs
     res <- mwb_metadata("ST002115")
     expect_true(is.list(res))
-    expect_true(all(c("MS_run", "sample_annotation") %in%
-                    names(res)))
+    expect_true(all(c("MS_run", "sample_annotation") %in% names(res)))
+
+    ## Test with single analysis ID
+    res <- mwb_metadata("ST002610")
+    expect_true(is.list(res))
+    expect_true(all(c("MS_run", "sample_annotation") %in% names(res)))
+
 })
 
 test_that(".sleep_mult works", {

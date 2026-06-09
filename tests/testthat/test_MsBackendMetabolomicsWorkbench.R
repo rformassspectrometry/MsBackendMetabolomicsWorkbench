@@ -21,14 +21,14 @@ test_that("backendInitialize,MsBackendMetabolomicsWorkbench works", {
     expect_error(backendInitialize(MsBackendMetabolomicsWorkbench(),
                                    mwbId = "AAAA"),
                  "Failed to retrieve")
-    ## Test failing POST request
+    ## Test failing request request
     query_args <- NULL
-    mock_POST <- function(url, query) {
+    mock_request <- function(url, query) {
         query_args <<- list(url = url, query = query)
-        stop("simulated POST failure")
+        stop("simulated request failure")
     }
 
-    with_mocked_bindings("POST" = mock_POST, {
+    with_mocked_bindings("request" = mock_request, {
         expect_error(backendInitialize(MsBackendMetabolomicsWorkbench(),
                                        mwbId = "ST002115",
                                        filePattern = "DMSO_01_RP.mzXML$"),

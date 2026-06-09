@@ -1,5 +1,16 @@
 # MsBackendMetabolomicsWorkbench 0.1
 
+## Changes in 0.1.4
+
+- Handle encoded sample filenames.
+- Improve the managing of POST failures.
+- Improve the handling of cached files.
+- Add the POST request for .tar.gz archive.
+- Change from copy to move when adding files to cache after zip download.
+- Centralize retry pattern.
+- Expand tests.
+- Add GHA.
+
 ## Changes in 0.1.3
 
 - Add vignette.
