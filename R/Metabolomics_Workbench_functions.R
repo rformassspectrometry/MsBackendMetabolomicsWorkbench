@@ -365,23 +365,19 @@ mwb_metadata <- function(mwbId = character()) {
         stop("Provide 1 Metabolomics Workbench ID.")
 
     analysis_list <- fromJSON(mwb_rest_request(mwbId, outputItem = "analysis"))
-    if ("analysis_id" %in% names(analysis_list)) {
+    if ("analysis_id" %in% names(analysis_list))
         analysis_id_l <- analysis_list$analysis_id
-    } else {
-        analysis_id_l <- unlist(lapply(analysis_list, function(x) {
-            x$analysis_id
-        }))
-    }
+    else
+        analysis_id_l <- unlist(lapply(analysis_list,
+                                       function(x) { x$analysis_id }))
 
     meta_list <- lapply(analysis_id_l, function(id) {
         response <- mwb_rest_request(id, idType = "analysis_id",
                                      outputItem = "mwtab")
-
         ## Fix duplicate keys in the JSON response
         pattern <- '"([^"]+)"(\\s*:\\s*"[^"]*"\\s*,\\s*)"\\1"'
         replacement <- '"\\1"\\2"\\1_2"'
         json_string <- gsub(pattern, replacement, response)
-
         tryCatch(meta_list <- fromJSON(json_string),
                  error = function(e) {
                     stop("Failed to parse JSON response for analysis ID \"",
@@ -395,7 +391,8 @@ mwb_metadata <- function(mwbId = character()) {
         meta_list_df <- lapply(intersect(meta_exp, names(meta_list)),
                                function(x) {as.data.frame(meta_list[[x]])})
         ## Remove empty data.frame
-        meta_list_df <- meta_list_df[!sapply(meta_list_df, nrow) == 0]
+        meta_list_df <- meta_list_df[vapply(meta_list_df, nrow,
+                                            integer(1)) != 0]
         exp_df <- do.call(cbind, meta_list_df)
         ## Data.frame with the metadata of the samples.
         df_cols <- names(which(lapply(meta_list[["SUBJECT_SAMPLE_FACTORS"]],
@@ -405,7 +402,6 @@ mwb_metadata <- function(mwbId = character()) {
 
         meta_df <- list("MS_run" = exp_df, "sample_annotation" = sample_df)
     })
-
     if (length(meta_list) > 1) {
         meta_list <- list(
             "MS_run" = unique(do.call(rbind.fill,
@@ -479,6 +475,8 @@ mwb_cached_data_files <- function(mwbId = character(),
 #'
 #' @importMethodsFrom BiocFileCache bfcmeta<-
 #'
+#' @importFrom tools file_path_sans_ext
+#'
 #' @noRd
 .mwb_data_files <- function(mwbId = character(),
                             pattern = "mzML$|mzml$|CDF$|mzXML$",
@@ -488,65 +486,59 @@ mwb_cached_data_files <- function(mwbId = character(),
         stop("No files matching the provided file pattern found for ",
                 "Metabolomics Workbench data set ", mwbId, ".", call. = FALSE)
     }
-
     dfiles$parsed_name <- basename(URLdecode(gsub("\\+", "%20",
                                                   dfiles$sample_file)))
-
     ## Filter by fileName
     if (length(fileName)) {
-        fileName_parsed <- URLdecode(gsub("\\+", "%20", fileName))
-        keep <- dfiles$parsed_name %in% fileName |
-                    dfiles$parsed_name %in% fileName_parsed
-        if (!any(keep))
-            stop("None of the 'fileName' found in data set \"", mwbId, "\"")
-        dfiles <- dfiles[keep, ]
+        dfiles <- .mwb_filename_filter(dfiles, fileName, mwbId)
     }
-
     bfc <- BiocFileCache()
-    if (.mwb_has_mwb_table()) {
-        res_cached <- as.data.frame(bfcquery(bfc, mwbId, field = "mwb_id"))
-    } else {
-        res_cached <- data.frame()
-    }
-    if (nrow(res_cached)) {
-        res_to_download <- res_cached[!(dfiles$parsed_name %in%
-                                        res_cached$file_name), "file_name"]
-    } else {
-        res_to_download <- dfiles$parsed_name
-    }
+    res_cached <- .mwb_bfc_table(bfc, mwbId)
+    dfiles$parsed_name <- paste0(file_path_sans_ext(dfiles$zip_file,
+                                                    compression = TRUE),
+                                 "_", dfiles$parsed_name)
+    res_to_download <- .mwb_to_download(dfiles, res_cached)
 
     mdata <- data.frame()
+    dfiles_update <- data.frame()
     if (length(res_to_download)) {
+        dfiles_filt <- dfiles[dfiles$parsed_name %in% res_to_download, ]
         if (ftp_zip) {
-            res <- .mwb_data_files_ftp(mwbId, dfiles, bfc)
+            res <- .mwb_data_files_ftp(mwbId, dfiles_filt, bfc)
             lfiles <- unlist(lapply(res, `[[`, 1))
-            dfiles <- Reduce(rbind, lapply(res, `[[`, 2))
+            dfiles_update <- Reduce(rbind, lapply(res, `[[`, 2))
         } else {
-            res <- .mwb_data_files_post(mwbId, dfiles, bfc)
+            res <- .mwb_data_files_post(mwbId, dfiles_filt, bfc)
             lfiles <- res$lfiles
-            dfiles <- res$dfiles
+            dfiles_update <- res$dfiles
         }
 
         if (is.null(lfiles)) {
             stop("Failed to connect to Metabolomics Workbench. ",
                     "No internet connection?")
         }
-
         ## Add and store metadata to the cached files
-        mdata <- data.frame(
-            rid = names(lfiles),
-            mwb_id = mwbId,
-            zip_file = dfiles$zip_file,
-            file_name = dfiles$sample_file)
-        bfcmeta(bfc, name = "MWB", overwrite = TRUE) <- mdata
+        mdata <- data.frame(rid = names(lfiles), mwb_id = mwbId,
+                            zip_file = dfiles_update$zip_file,
+                            file_name = dfiles_update$sample_file)
+        bfcmeta(bfc, name = "MWB", append = TRUE) <- mdata
         mdata$rpath <- lfiles
     }
-    if (nrow(res_cached) != length(res_to_download)) {
-        mdata <- rbind(res_cached[res_cached$file_name %in%
-                                    dfiles$parsed_name, ],
-                        mdata)
-    }
 
+    if (nrow(res_cached)) {
+        if (!length(res_to_download)) {
+            mdata <- res_cached[res_cached$file_name %in% dfiles$parsed_name,
+                                c("rid","mwb_id","zip_file",
+                                  "file_name","rpath")]
+        } else if (length(res_to_download) != nrow(dfiles)) {
+            mdata <- rbind(res_cached[res_cached$file_name %in%
+                                        setdiff(dfiles$parsed_name,
+                                                dfiles_update$sample_file),
+                                      c("rid","mwb_id","zip_file",
+                                        "file_name","rpath")],
+                            mdata)
+        }
+    }
     mdata
 }
 
@@ -557,12 +549,13 @@ mwb_cached_data_files <- function(mwbId = character(),
 #'
 #' @importFrom MsCoreUtils retry
 #'
+#' @importFrom tools file_path_sans_ext
+#'
 #' @importMethodsFrom BiocFileCache bfcnew bfcremove bfcupdate
 #'
 #' @noRd
 .mwb_data_files_post <- function(mwbId = character(), dfiles = NULL,
                                 bfc = NULL) {
-    ## Cache files
     pb <- progress_bar$new(format = paste0("[:bar] :current/:",
                                             "total (:percent) in ",
                                             ":elapsed"),
@@ -575,29 +568,23 @@ mwb_cached_data_files <- function(mwbId = character(),
             A = paste0(dfiles[i, "zip_file"]),
             F = paste0(dfiles[i, "sample_file"])
         )
-        if (endsWith(params$A, ".tar.gz")) {
+        if (endsWith(params$A, ".tar.gz"))
             url <- paste0("https://metabolomicsworkbench.org/data/",
                           "file_extract_targz1.php")
-        } else {
+        else
             url <- "https://metabolomicsworkbench.org/data/file_extract_7z.php"
-        }
 
         ## Submit POST request and save directly to cache path
         cache_path <- bfcnew(bfc, dfiles[i, "parsed_name"], fname = "exact")
-        if (file.exists(cache_path))
-            file.remove(cache_path)
+        if (file.exists(cache_path)) file.remove(cache_path)
 
         invisible({
-            response <- retry(
-                request(url) |>
-                    req_body_form(!!!params) |>
-                    req_perform(path = cache_path),
-                sleep_mult = .sleep_mult(),
-                retry_on = .RETRY_ON_PATTERN)
-
+            response <- retry(request(url) |> req_body_form(!!!params) |>
+                                req_perform(path = cache_path),
+                                sleep_mult = .sleep_mult(),
+                                retry_on = .RETRY_ON_PATTERN)
             ## Remove failed POST request
-            if (resp_status(response) != 200 ||
-                    !file.exists(cache_path) ||
+            if (resp_status(response) != 200 || !file.exists(cache_path) ||
                     file.info(cache_path)$size == 0) {
                 bfcremove(bfc, names(cache_path))
                 dfiles <- dfiles[dfiles[, "sample_file"] != dfiles[i,
@@ -607,21 +594,17 @@ mwb_cached_data_files <- function(mwbId = character(),
                                           dfiles[i, "parsed_name"])
                 file.rename(cache_path, rpath_update)
                 suppressWarnings(bfcupdate(bfc, names(cache_path),
-                                            rpath = rpath_update))
+                                           rpath = rpath_update))
                 names(rpath_update) <- names(cache_path)
-
                 lfiles <- c(lfiles, rpath_update)
             }
         })
     }
-
     if ("parsed_name" %in% names(dfiles)) {
         dfiles$sample_file <- dfiles$parsed_name
         dfiles$parsed_name <- NULL
     }
-
-    res <- list("lfiles" = lfiles, "dfiles" = dfiles)
-    res
+    list("lfiles" = lfiles, "dfiles" = dfiles)
 }
 
 #' Download and cache data files for a given MWB ID via FTP server. This
@@ -636,6 +619,8 @@ mwb_cached_data_files <- function(mwbId = character(),
 #' @importFrom MsCoreUtils retry
 #'
 #' @importFrom utils URLdecode
+#'
+#' @importFrom tools file_path_sans_ext
 #'
 #' @importMethodsFrom BiocFileCache bfcrpath bfccache bfcadd bfcremove
 #'
@@ -660,12 +645,16 @@ mwb_cached_data_files <- function(mwbId = character(),
         res <- archive_extract(f, dir = bfccache(bfc),
                                 files = dfiles[dfiles$zip_file == z,
                                                 "sample_file"])
-        res_f <- bfcadd(bfc, paste0(bfccache(bfc), "/", res),
+        new_f <- paste0(bfccache(bfc), "/", dirname(res), "/",
+                        file_path_sans_ext(z, compression = TRUE), "_",
+                        basename(res))
+        file.rename(paste0(bfccache(bfc), "/", res), new_f)
+        res_f <- bfcadd(bfc, new_f,
                         fname = "exact", action = "move")
         bfcremove(bfc, rids = names(f))
 
         dfiles <- data.frame("zip_file" = z,
-                            "sample_file" = basename(res_f))
+                             "sample_file" = basename(res_f))
         list("lfiles" = res_f, "dfiles" = dfiles)
     })
 
@@ -720,6 +709,53 @@ mwb_delete_cache <- function(mwbId = character()) {
             bfcremove(bfc, rids = rem$rid)
         }
     }
+}
+
+#' Helper function to query the BiocFileCache for cached data files of a given
+#' MWB ID.
+#'
+#' @importMethodsFrom BiocFileCache bfcquery
+#'
+#' @noRd
+.mwb_bfc_table <- function(bfc, mwbId) {
+    if (.mwb_has_mwb_table())
+        as.data.frame(bfcquery(bfc, mwbId, field = "mwb_id"))
+    else
+        data.frame()
+}
+
+#' Helper funtion to check which files need to be downloaded by comparing the
+#' available files with the cached files.
+#'
+#' @noRd
+.mwb_to_download <- function(dfiles, res_cached) {
+    if (nrow(res_cached))
+        setdiff(dfiles$parsed_name, res_cached$file_name)
+    else
+        dfiles$parsed_name
+}
+
+#' Helper function to filter based on filename.
+#'
+#' @importFrom tools file_path_sans_ext
+#'
+#' @importFrom stringr str_replace_all
+#'
+#' @importFrom utils URLdecode
+#'
+#' @noRd
+.mwb_filename_filter <- function(dfiles, fileName, mwbId) {
+    fileName <- c(str_replace_all(fileName,
+                    paste0("^", file_path_sans_ext(unique(dfiles$zip_file),
+                                                    compression = TRUE),
+                    "_", collapse = "|"), ""),
+                fileName)
+    fileName_parsed <- URLdecode(gsub("\\+", "%20", fileName))
+    keep <- dfiles$parsed_name %in% fileName |
+                dfiles$parsed_name %in% fileName_parsed
+    if (!any(keep))
+        stop("None of the 'fileName' found in data set \"", mwbId, "\"")
+    dfiles[keep, ]
 }
 
 #' @noRd

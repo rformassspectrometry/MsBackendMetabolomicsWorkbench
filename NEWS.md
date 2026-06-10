@@ -1,5 +1,9 @@
 # MsBackendMetabolomicsWorkbench 0.1
 
+## Changes in 0.1.5
+
+- Fix bug caching files with same filename. Add zip filename to sample filename.
+
 ## Changes in 0.1.4
 
 - Handle encoded sample filenames.
