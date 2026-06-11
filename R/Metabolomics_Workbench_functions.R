@@ -391,8 +391,7 @@ mwb_metadata <- function(mwbId = character()) {
         meta_list_df <- lapply(intersect(meta_exp, names(meta_list)),
                                function(x) {as.data.frame(meta_list[[x]])})
         ## Remove empty data.frame
-        meta_list_df <- meta_list_df[vapply(meta_list_df, nrow,
-                                            integer(1)) != 0]
+        meta_list_df <- meta_list_df[vapply(meta_list_df, nrow, 1L) != 0]
         exp_df <- do.call(cbind, meta_list_df)
         ## Data.frame with the metadata of the samples.
         df_cols <- names(which(lapply(meta_list[["SUBJECT_SAMPLE_FACTORS"]],
@@ -645,10 +644,10 @@ mwb_cached_data_files <- function(mwbId = character(),
         res <- archive_extract(f, dir = bfccache(bfc),
                                 files = dfiles[dfiles$zip_file == z,
                                                 "sample_file"])
-        new_f <- paste0(bfccache(bfc), "/", dirname(res), "/",
-                        file_path_sans_ext(z, compression = TRUE), "_",
-                        basename(res))
-        file.rename(paste0(bfccache(bfc), "/", res), new_f)
+        new_f <- file.path(bfccache(bfc), dirname(res),
+                          paste0(file_path_sans_ext(z, compression = TRUE), "_",
+                                 basename(res)))
+        file.rename(file.path(bfccache(bfc), res), new_f)
         res_f <- bfcadd(bfc, new_f,
                         fname = "exact", action = "move")
         bfcremove(bfc, rids = names(f))
