@@ -100,7 +100,10 @@ test_that(".mwb_data_files_ftp works", {
 
 test_that(".mwb_data_files_post works", {
     dfiles <- mwb_list_files(x = "ST002115", pattern = "01_RP.mzXML$")
-    dfiles$parsed_name <- basename(dfiles$sample_file)
+    dfiles$parsed_name <- paste0(file_path_sans_ext(dfiles$zip_file,
+                                                    compression = TRUE), "_",
+                                 basename(dfiles$sample_file))
+
     bfc <- BiocFileCache()
 
     ## Simulate POST providing status code 400
@@ -122,8 +125,9 @@ test_that(".mwb_data_files_post works", {
 
     ## Test .tar.gz extractor
     dfiles <- mwb_list_files(x = "ST001357", pattern = "124.mzML$")
-    dfiles$parsed_name <- basename(URLdecode(gsub("\\+", "%20",
-                                                    dfiles$sample_file)))
+    dfiles$parsed_name <- paste0(file_path_sans_ext(dfiles$zip_file,
+                                                    compression = TRUE), "_",
+                basename(URLdecode(gsub("\\+", "%20", dfiles$sample_file))))
     bfc <- BiocFileCache()
     res <- .mwb_data_files_post(mwbId = "ST001357", dfiles = dfiles, bfc = bfc)
     expect_true(is.list(res))
