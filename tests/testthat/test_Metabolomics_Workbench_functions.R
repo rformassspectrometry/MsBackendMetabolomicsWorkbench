@@ -273,7 +273,6 @@ test_that("mwb_ftp_download works", {
     ## Test overwrite = FALSE (default): file should be skipped
     mtime_before <- file.info(file.path(tmp,
                                         "ST000909_AN001476_Results.txt"))$mtime
-    Sys.sleep(1)
     expect_message(
         suppressWarnings(
             mwb_ftp_download("ST000909", pattern = ".txt", path = tmp)
@@ -285,7 +284,6 @@ test_that("mwb_ftp_download works", {
     expect_equal(mtime_before, mtime_after)
 
     ## Test overwrite = TRUE: file should be re-downloaded
-    Sys.sleep(1)
     suppressWarnings(
         mwb_ftp_download("ST000909", pattern = ".txt", path = tmp,
                          overwrite = TRUE)

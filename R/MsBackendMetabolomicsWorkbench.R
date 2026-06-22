@@ -79,6 +79,9 @@
 #'     mzML, CDF and mzXML files which are supported by *Spectra*'s
 #'     `MsBackendMzR` backend.
 #'
+#' @param fileName `character` defining the names of specific data files of a
+#'     data set that should be downloaded and cached.
+#'
 #' @param ftp_zip for `mwb_sync_data_files()`: `logical(1)` download the
 #'     complete zip of the experiment from the FTP server. Defaults to `FALSE`,
 #'     in which case the files are downloaded singularly via POST request.
@@ -187,8 +190,8 @@ MsBackendMetabolomicsWorkbench <- function() {
 setMethod(
     "backendInitialize", "MsBackendMetabolomicsWorkbench",
     function(object, mwbId = character(),
-             filePattern = "mzML$|CDF$|cdf$|mzXML$", ftp_zip = FALSE,
-             offline = FALSE, ...) {
+             filePattern = "mzML$|CDF$|cdf$|mzXML$", fileName = character(),
+             ftp_zip = FALSE, offline = FALSE, ...) {
         dots <- list(...)
         if (any(names(dots) == "data"))
             stop("Parameter 'data' is not supported for ",
@@ -199,8 +202,8 @@ setMethod(
             stop("Parameter 'mwbId' is required and can only be a single ",
                  "ID of a Metabolomics Workbench data set.")
         if (offline)
-            mdata <- .mwb_data_files_offline(mwbId, filePattern)
-        else mdata <- .mwb_data_files(mwbId, filePattern, ftp_zip = ftp_zip)
+            mdata <- mwb_cached_data_files(mwbId, filePattern, fileName)
+        else mdata <- mwb_sync_data_files(mwbId, filePattern, fileName, ftp_zip)
         object <- backendInitialize(MsBackendMzR(), files = mdata$rpath)
         idx <- match(dataOrigin(object),
                      normalizePath(mdata$rpath, mustWork = FALSE))

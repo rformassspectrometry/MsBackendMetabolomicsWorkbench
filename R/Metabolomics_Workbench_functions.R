@@ -438,9 +438,13 @@ mwb_cached_data_files <- function(mwbId = character(),
                                   pattern = "*", fileName = character()) {
     res <- .mwb_data_files_offline(mwbId = mwbId,
                                    pattern = pattern)
-    if (length(fileName))
+    if (length(fileName)) {
+        fileName <- .mwb_parse_fileName(fileName,
+                        zipName = file_path_sans_ext(unique(res$zip_file),
+                                                    compression = TRUE))
         res <- res[basename(res$file_name) %in% fileName, ]
-    else res
+    } else
+        res
 }
 
 #' Get information on data files for a given ST (MWB) ID eventually
@@ -611,8 +615,6 @@ mwb_cached_data_files <- function(mwbId = character(),
 #'
 #' @importFrom progress progress_bar
 #'
-#' @importFrom stringr str_replace_all
-#'
 #' @importFrom archive archive_extract
 #'
 #' @importFrom MsCoreUtils retry
@@ -738,23 +740,36 @@ mwb_delete_cache <- function(mwbId = character()) {
 #'
 #' @importFrom tools file_path_sans_ext
 #'
-#' @importFrom stringr str_replace_all
-#'
 #' @importFrom utils URLdecode
 #'
 #' @noRd
 .mwb_filename_filter <- function(dfiles, fileName, mwbId) {
-    fileName <- c(str_replace_all(fileName,
-                    paste0("^", file_path_sans_ext(unique(dfiles$zip_file),
+    fileName <- c(gsub(fileName,
+            pattern = paste0("^", file_path_sans_ext(unique(dfiles$zip_file),
                                                     compression = TRUE),
-                    "_", collapse = "|"), ""),
-                fileName)
+                            "_", collapse = "|"),
+            replacement = ""),
+        fileName)
     fileName_parsed <- URLdecode(gsub("\\+", "%20", fileName))
     keep <- dfiles$parsed_name %in% fileName |
                 dfiles$parsed_name %in% fileName_parsed
     if (!any(keep))
         stop("None of the 'fileName' found in data set \"", mwbId, "\"")
     dfiles[keep, ]
+}
+
+#' Helper function to generate the correct vector of fileName with the
+#' combination of `fileName` and `zipName_fileName`.
+#'
+#' @noRd
+.mwb_parse_fileName <- function(fileName, zipName) {
+    if(all(startsWith(fileName, zipName))){
+        c(gsub(fileName, pattern = paste0("^", zipName, "_", collapse = "|"),
+               replacement = ""),
+          fileName)
+    } else{
+        c(paste0(zipName, "_", fileName), fileName)
+    }
 }
 
 #' @noRd

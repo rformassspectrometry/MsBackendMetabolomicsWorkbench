@@ -14,6 +14,7 @@ MsBackendMetabolomicsWorkbench()
   object,
   mwbId = character(),
   filePattern = "mzML$|CDF$|cdf$|mzXML$",
+  fileName = character(),
   ftp_zip = FALSE,
   offline = FALSE,
   ...
@@ -34,6 +35,9 @@ supported (or requested) file types. Defaults to
 \code{filePattern = "mzML$|CDF$|cdf$|mzXML$"} hence restricting to
 mzML, CDF and mzXML files which are supported by \emph{Spectra}'s
 \code{MsBackendMzR} backend.}
+
+\item{fileName}{\code{character} defining the names of specific data files of a
+data set that should be downloaded and cached.}
 
 \item{ftp_zip}{for \code{mwb_sync_data_files()}: \code{logical(1)} download the
 complete zip of the experiment from the FTP server. Defaults to \code{FALSE},
