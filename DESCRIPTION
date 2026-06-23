@@ -1,6 +1,6 @@
 Package: MsBackendMetabolomicsWorkbench
 Title: Retrieve Mass Spectrometry Data from Metabolomics Workbench
-Version: 0.1.5
+Version: 0.1.7
 Authors@R:
     c(person(given = "Gabriele", family = "Tomè",
              email = "gabriele.tome@eurac.edu",
@@ -34,7 +34,6 @@ Imports:
     S4Vectors,
     methods,
     progress,
-    stringr,
     MsCoreUtils (>= 1.23.9),
     jsonlite,
     plyr,
@@ -46,7 +45,7 @@ Suggests:
     mzR,
     knitr,
     BiocStyle
-License: Artistic-2.0
+License: GPL-3
 Encoding: UTF-8
 VignetteBuilder: knitr
 BugReports: https://github.com/RforMassSpectrometry/MsBackendMetabolomicsWorkbench/issues

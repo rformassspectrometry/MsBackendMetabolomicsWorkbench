@@ -53,12 +53,28 @@ test_that("backendInitialize,MsBackendMetabolomicsWorkbench works", {
                         Spectra::spectraVariables(res)))
     expect_true(all(res$mwb_id == "ST002115"))
 
+    ## Test real data set with filename.
+    res_f <- backendInitialize(MsBackendMetabolomicsWorkbench(),
+                             mwbId = "ST002115",
+                             fileName = "HT1080_DMSO_03_RP.mzXML")
+    expect_s4_class(res_f, "MsBackendMetabolomicsWorkbench")
+    expect_true(all(c("mwb_id", "zip_file", "file_name") %in%
+                        Spectra::spectraVariables(res_f)))
+    expect_true(all(res_f$mwb_id == "ST002115"))
+
     ## Offline
     res_o <- backendInitialize(MsBackendMetabolomicsWorkbench(),
                                mwbId = "ST002115",
                                filePattern = "DMSO_02_RP.mzXML$",
                                offline = TRUE)
     expect_equal(Spectra::rtime(res), Spectra::rtime(res_o))
+
+    ## Offline by filename
+    res_of <- backendInitialize(MsBackendMetabolomicsWorkbench(),
+                               mwbId = "ST002115",
+                               fileName = "HT1080_DMSO_03_RP.mzXML",
+                               offline = TRUE)
+    expect_equal(Spectra::rtime(res_f), Spectra::rtime(res_of))
 })
 
 test_that("backendRequiredSpectraVariables,MsBackendMetabolomicsWorkbench
