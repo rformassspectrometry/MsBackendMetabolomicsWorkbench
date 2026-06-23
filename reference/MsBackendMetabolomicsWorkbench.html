@@ -43,7 +43,7 @@ mwb_cached_data_files() for more information."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">MsBackendMetabolomicsWorkbench</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -101,6 +101,7 @@ also provided by <em>MsBackendMetabolomicsWorkbench</em>. See help for
 <span>  <span class="va">object</span>,</span>
 <span>  mwbId <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  filePattern <span class="op">=</span> <span class="st">"mzML$|CDF$|cdf$|mzXML$"</span>,</span>
+<span>  fileName <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  ftp_zip <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  offline <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  <span class="va">...</span></span>
@@ -131,6 +132,11 @@ supported (or requested) file types. Defaults to
 <code>filePattern = "mzML$|CDF$|cdf$|mzXML$"</code> hence restricting to
 mzML, CDF and mzXML files which are supported by <em>Spectra</em>'s
 <code>MsBackendMzR</code> backend.</p></dd>
+
+
+<dt id="arg-filename">fileName<a class="anchor" aria-label="anchor" href="#arg-filename"></a></dt>
+<dd><p><code>character</code> defining the names of specific data files of a
+data set that should be downloaded and cached.</p></dd>
 
 
 <dt id="arg-ftp-zip">ftp_zip<a class="anchor" aria-label="anchor" href="#arg-ftp-zip"></a></dt>

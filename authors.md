@@ -20,13 +20,13 @@ Source:
 
 Tomè G, Louail P, Rainer J (2026). *MsBackendMetabolomicsWorkbench:
 Retrieve Mass Spectrometry Data from Metabolomics Workbench*. R package
-version 0.1.5,
+version 0.1.7,
 <https://github.com/RforMassSpectrometry/MsBackendMetabolomicsWorkbench>.
 
     @Manual{,
       title = {MsBackendMetabolomicsWorkbench: Retrieve Mass Spectrometry Data from Metabolomics Workbench},
       author = {Gabriele Tomè and Philippine Louail and Johannes Rainer},
       year = {2026},
-      note = {R package version 0.1.5},
+      note = {R package version 0.1.7},
       url = {https://github.com/RforMassSpectrometry/MsBackendMetabolomicsWorkbench},
     }

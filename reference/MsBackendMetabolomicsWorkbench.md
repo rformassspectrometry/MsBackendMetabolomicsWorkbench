@@ -33,6 +33,7 @@ backendInitialize(
   object,
   mwbId = character(),
   filePattern = "mzML$|CDF$|cdf$|mzXML$",
+  fileName = character(),
   ftp_zip = FALSE,
   offline = FALSE,
   ...
@@ -61,6 +62,11 @@ mwb_sync(x, offline = FALSE)
   file types. Defaults to `filePattern = "mzML$|CDF$|cdf$|mzXML$"` hence
   restricting to mzML, CDF and mzXML files which are supported by
   *Spectra*'s `MsBackendMzR` backend.
+
+- fileName:
+
+  `character` defining the names of specific data files of a data set
+  that should be downloaded and cached.
 
 - ftp_zip:
 

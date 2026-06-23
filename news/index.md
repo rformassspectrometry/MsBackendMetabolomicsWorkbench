@@ -2,6 +2,16 @@
 
 ## MsBackendMetabolomicsWorkbench 0.1
 
+### Changes in 0.1.7
+
+- Add `fileName` parameter to `backendInitialize`.
+- Remove `stringr` import.
+- Update tests.
+
+### Changes in 0.1.6
+
+- Update license to GPL-3.
+
 ### Changes in 0.1.5
 
 - Fix bug caching files with same filename. Add zip filename to sample
