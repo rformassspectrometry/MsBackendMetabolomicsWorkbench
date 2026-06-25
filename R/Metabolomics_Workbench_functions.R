@@ -23,12 +23,6 @@
 #'   `"sample_file"` column. This function requires an active internet
 #'   connection.
 #'
-#' - `mwb_rest_request()`: queries the Metabolomics Workbench REST API for
-#'   a given study/analysis ID and output item (e.g. `"summary"`, `"factors"`).
-#'   Returns the raw response as a `character` string in the format specified
-#'   by `outputFormat` (`"json"` or `"txt"`). This function requires an active
-#'   internet connection.
-#'
 #' - `mwb_ftp_list_files()`: queries the Metabolomics Workbench FTP server for a
 #'   given experiment ID and returns the related files. Parameter `pattern`
 #'   allows to filter the results. In contrast to `mwb_list_files()`, this
@@ -37,18 +31,25 @@
 #'   zip file. Other files may also be present on the FTP server. This function
 #'   requires an active internet connection.
 #'
-#' - `mwb_ftp_download()`: download files from Metabolomics Workbench FTP
-#'   server for a given experiment ID. Use `pattern` to filter files by name
-#'   using a regular expression (by default all files are downloaded). Use
-#'   `path` to set the destination directory for downloaded files. Only files
-#'   listed by `mwb_ftp_list_files()` can be downloaded.
-#'
 #' - `mwb_metadata()`: retrieves the metadata of a given MWB data set as a
 #'   `list` with two `data.frame`: one with the metadata of the experiment and
 #'   one with the sample annotation. The function handles the case of multiple
 #'   analysis IDs by combining the metadata of all analysis IDs into a single
 #'   `data.frame` for the experiment and a single `data.frame` for the sample
 #'   annotation. This function requires an active internet connection.
+#'
+#' - `mwb_rest_request()`: queries the Metabolomics Workbench REST API for
+#'   a given study/analysis ID and output item (e.g. `"summary"`, `"factors"`).
+#'   Returns the raw response as a `character` string in the format specified
+#'   by `outputFormat` (`"json"` or `"txt"`). This function requires an active
+#'   internet connection.
+#'
+#' - `mwb_ftp_download()`: download files from Metabolomics Workbench FTP
+#'   server for a given experiment ID. Use `pattern` to filter files by name
+#'   using a regular expression (by default all files are downloaded). Use
+#'   `path` to set the destination directory for downloaded files. Only files
+#'   listed by `mwb_ftp_list_files()` can be downloaded. This function requires
+#'   an active internet connection.
 #'
 #' - `mwb_sync_data_files()`: synchronize data files of a specified
 #'   MWB data set eventually downloading and locally caching them.
@@ -90,11 +91,11 @@
 #'    set/experiment.
 #'
 #' @param pattern for `mwb_list_files()`, `mwb_sync_data_files()`,
-#'     `mwb_cached_data_files()`, `mwb_ftp_list_files` and `mwb_ftp_download`:
-#'     `character(1)` defining a pattern to filter the file names, such as
-#'     `pattern = "mzML$"` to retrieve the file names of all files of the data
-#'     set (i.e., files with extension `"mzML"`). This parameter is passed to
-#'     the [grepl()] function.
+#'     `mwb_cached_data_files()`, `mwb_ftp_list_files()` and
+#'     `mwb_ftp_download()`: `character(1)` defining a pattern to filter the
+#'     file names, such as `pattern = "mzML$"` to retrieve the file names of
+#'     all files of the data set (i.e., files with extension `"mzML"`). This
+#'     parameter is passed to the [grepl()] function.
 #'
 #' @param fileName for `mwb_sync_data_files()` and `mwb_cached_data_files()`:
 #'     optional `character` defining the names of specific data files of a data
@@ -116,7 +117,7 @@
 #' @param outputFormat for `mwb_rest_request()`: `character(1)` defining the
 #'     output format of the metadata. The supported output are `json` and `txt`.
 #'
-#' @param path for `mwb_ftp_download()`: optional `character` defining the
+#' @param path for `mwb_ftp_download()`: optional `character(1)` defining the
 #'     directory where download the files.
 #'
 #' @param overwrite for `mwb_ftp_download()`: `logical(1)` whether
@@ -133,10 +134,10 @@
 #' - For `mwb_sync_data_files()` and `mwb_cached_data_files()`: a
 #'   `data.frame` with the MWB ID, the name(s) and remote and
 #'   local file names of the synchronized data files.
-#' - For `mwb_ftp_list_files`: `character` with the files in FTP server for a
+#' - For `mwb_ftp_list_files()`: `character` with the files in FTP server for a
 #'   specific ID.
-#' - For `mwb_metadata`: `list` with two `data.frame`: one with the metadata of
-#'   the experiment and one with the sample annotation.
+#' - For `mwb_metadata()`: `list` with two `data.frame`: one with the metadata
+#'   of the experiment and one with the sample annotation.
 #'
 #' @author Gabriele Tomè, Johannes Rainer, Philippine Louail
 #'
@@ -436,12 +437,8 @@ mwb_sync_data_files <- function(mwbId = character(),
 #' @export
 mwb_cached_data_files <- function(mwbId = character(),
                                   pattern = "*", fileName = character()) {
-    res <- .mwb_data_files_offline(mwbId = mwbId,
-                                   pattern = pattern)
+    res <- .mwb_data_files_offline(mwbId = mwbId, pattern = pattern)
     if (length(fileName)) {
-        fileName <- .mwb_parse_fileName(fileName,
-                        zipName = file_path_sans_ext(unique(res$zip_file),
-                                                    compression = TRUE))
         res <- res[basename(res$file_name) %in% fileName, ]
     } else
         res
@@ -478,8 +475,6 @@ mwb_cached_data_files <- function(mwbId = character(),
 #'
 #' @importMethodsFrom BiocFileCache bfcmeta<-
 #'
-#' @importFrom tools file_path_sans_ext
-#'
 #' @noRd
 .mwb_data_files <- function(mwbId = character(),
                             pattern = "mzML$|mzml$|CDF$|mzXML$",
@@ -497,9 +492,6 @@ mwb_cached_data_files <- function(mwbId = character(),
     }
     bfc <- BiocFileCache()
     res_cached <- .mwb_bfc_table(bfc, mwbId)
-    dfiles$parsed_name <- paste0(file_path_sans_ext(dfiles$zip_file,
-                                                    compression = TRUE),
-                                 "_", dfiles$parsed_name)
     res_to_download <- .mwb_to_download(dfiles, res_cached)
 
     mdata <- data.frame()
@@ -594,7 +586,9 @@ mwb_cached_data_files <- function(mwbId = character(),
                                                                 "sample_file"],]
             } else {
                 rpath_update <- file.path(dirname(cache_path),
-                                          dfiles[i, "parsed_name"])
+                            paste0(file_path_sans_ext(dfiles[i,  "zip_file"],
+                                                    compression = TRUE),
+                                    "_", dfiles[i, "parsed_name"]))
                 file.rename(cache_path, rpath_update)
                 suppressWarnings(bfcupdate(bfc, names(cache_path),
                                            rpath = rpath_update))
@@ -655,7 +649,7 @@ mwb_cached_data_files <- function(mwbId = character(),
         bfcremove(bfc, rids = names(f))
 
         dfiles <- data.frame("zip_file" = z,
-                             "sample_file" = basename(res_f))
+                             "sample_file" = basename(res))
         list("lfiles" = res_f, "dfiles" = dfiles)
     })
 
@@ -744,12 +738,6 @@ mwb_delete_cache <- function(mwbId = character()) {
 #'
 #' @noRd
 .mwb_filename_filter <- function(dfiles, fileName, mwbId) {
-    fileName <- c(gsub(fileName,
-            pattern = paste0("^", file_path_sans_ext(unique(dfiles$zip_file),
-                                                    compression = TRUE),
-                            "_", collapse = "|"),
-            replacement = ""),
-        fileName)
     fileName_parsed <- URLdecode(gsub("\\+", "%20", fileName))
     keep <- dfiles$parsed_name %in% fileName |
                 dfiles$parsed_name %in% fileName_parsed
@@ -758,25 +746,11 @@ mwb_delete_cache <- function(mwbId = character()) {
     dfiles[keep, ]
 }
 
-#' Helper function to generate the correct vector of fileName with the
-#' combination of `fileName` and `zipName_fileName`.
-#'
-#' @noRd
-.mwb_parse_fileName <- function(fileName, zipName) {
-    if(all(startsWith(fileName, zipName))){
-        c(gsub(fileName, pattern = paste0("^", zipName, "_", collapse = "|"),
-               replacement = ""),
-          fileName)
-    } else{
-        c(paste0(zipName, "_", fileName), fileName)
-    }
-}
-
 #' @noRd
 .sleep_mult <- function() {
-    as.integer(getOption("mwb.sleep_mult", default = 7L))
+    as.integer(getOption("mwb.sleep_mult", default = 5L))
 }
 
 ## "resolve"    missing internet connection
 ## "connection" server not reachable
-  .RETRY_ON_PATTERN <- "resolve|connection"
+.RETRY_ON_PATTERN <- "resolve|connection"

@@ -52,11 +52,11 @@ mwb_delete_cache(mwbId = character())
 starting with a \emph{ST} followed by a number).}
 
 \item{pattern}{for \code{mwb_list_files()}, \code{mwb_sync_data_files()},
-\code{mwb_cached_data_files()}, \code{mwb_ftp_list_files} and \code{mwb_ftp_download}:
-\code{character(1)} defining a pattern to filter the file names, such as
-\code{pattern = "mzML$"} to retrieve the file names of all files of the data
-set (i.e., files with extension \code{"mzML"}). This parameter is passed to
-the \code{\link[=grepl]{grepl()}} function.}
+\code{mwb_cached_data_files()}, \code{mwb_ftp_list_files()} and
+\code{mwb_ftp_download()}: \code{character(1)} defining a pattern to filter the
+file names, such as \code{pattern = "mzML$"} to retrieve the file names of
+all files of the data set (i.e., files with extension \code{"mzML"}). This
+parameter is passed to the \code{\link[=grepl]{grepl()}} function.}
 
 \item{id}{\code{character(1)} with the ID of a single Metabolomics Workbench data
 set/experiment.}
@@ -76,7 +76,7 @@ output format of the metadata. The supported output are \code{json} and \code{tx
 \item{mwbId}{\code{character(1)} with the ID of a single Metabolomics
 Workbench data set/experiment.}
 
-\item{path}{for \code{mwb_ftp_download()}: optional \code{character} defining the
+\item{path}{for \code{mwb_ftp_download()}: optional \code{character(1)} defining the
 directory where download the files.}
 
 \item{overwrite}{for \code{mwb_ftp_download()}: \code{logical(1)} whether
@@ -101,10 +101,10 @@ body, formatted as JSON or plain text depending on \code{outputFormat}.
 \item For \code{mwb_sync_data_files()} and \code{mwb_cached_data_files()}: a
 \code{data.frame} with the MWB ID, the name(s) and remote and
 local file names of the synchronized data files.
-\item For \code{mwb_ftp_list_files}: \code{character} with the files in FTP server for a
+\item For \code{mwb_ftp_list_files()}: \code{character} with the files in FTP server for a
 specific ID.
-\item For \code{mwb_metadata}: \code{list} with two \code{data.frame}: one with the metadata of
-the experiment and one with the sample annotation.
+\item For \code{mwb_metadata()}: \code{list} with two \code{data.frame}: one with the metadata
+of the experiment and one with the sample annotation.
 }
 }
 \description{
@@ -125,11 +125,6 @@ archive name and the file name within that archive.
 Parameter \code{pattern} allows to filter the results by matching against the
 \code{"sample_file"} column. This function requires an active internet
 connection.
-\item \code{mwb_rest_request()}: queries the Metabolomics Workbench REST API for
-a given study/analysis ID and output item (e.g. \code{"summary"}, \code{"factors"}).
-Returns the raw response as a \code{character} string in the format specified
-by \code{outputFormat} (\code{"json"} or \code{"txt"}). This function requires an active
-internet connection.
 \item \code{mwb_ftp_list_files()}: queries the Metabolomics Workbench FTP server for a
 given experiment ID and returns the related files. Parameter \code{pattern}
 allows to filter the results. In contrast to \code{mwb_list_files()}, this
@@ -137,17 +132,23 @@ function lists only the files on the FTP server (like the zip file of the
 experiment), while \code{mwb_list_files()} lists the files contained within the
 zip file. Other files may also be present on the FTP server. This function
 requires an active internet connection.
-\item \code{mwb_ftp_download()}: download files from Metabolomics Workbench FTP
-server for a given experiment ID. Use \code{pattern} to filter files by name
-using a regular expression (by default all files are downloaded). Use
-\code{path} to set the destination directory for downloaded files. Only files
-listed by \code{mwb_ftp_list_files()} can be downloaded.
 \item \code{mwb_metadata()}: retrieves the metadata of a given MWB data set as a
 \code{list} with two \code{data.frame}: one with the metadata of the experiment and
 one with the sample annotation. The function handles the case of multiple
 analysis IDs by combining the metadata of all analysis IDs into a single
 \code{data.frame} for the experiment and a single \code{data.frame} for the sample
 annotation. This function requires an active internet connection.
+\item \code{mwb_rest_request()}: queries the Metabolomics Workbench REST API for
+a given study/analysis ID and output item (e.g. \code{"summary"}, \code{"factors"}).
+Returns the raw response as a \code{character} string in the format specified
+by \code{outputFormat} (\code{"json"} or \code{"txt"}). This function requires an active
+internet connection.
+\item \code{mwb_ftp_download()}: download files from Metabolomics Workbench FTP
+server for a given experiment ID. Use \code{pattern} to filter files by name
+using a regular expression (by default all files are downloaded). Use
+\code{path} to set the destination directory for downloaded files. Only files
+listed by \code{mwb_ftp_list_files()} can be downloaded. This function requires
+an active internet connection.
 \item \code{mwb_sync_data_files()}: synchronize data files of a specified
 MWB data set eventually downloading and locally caching them.
 Parameter \code{fileName} allows to specify names of selected data files to

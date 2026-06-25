@@ -1,5 +1,10 @@
 # MsBackendMetabolomicsWorkbench 0.1
 
+## Changes in 0.1.8
+
+- Update the filename in `BiocFileCache` table.
+- Minor update for Bioconductor submission.
+
 ## Changes in 0.1.7
 
 - Add `fileName` parameter to `backendInitialize`.
