@@ -297,8 +297,6 @@ mwb_ftp_list_files <- function(mwbId = character(), pattern = "*") {
     list_ftp_files
 }
 
-#' @importFrom progress progress_bar
-#'
 #' @importFrom utils capture.output download.file
 #'
 #' @importFrom MsCoreUtils retry
@@ -320,12 +318,7 @@ mwb_ftp_download <- function(mwbId = character(), pattern = "*", path = "./",
     }
 
     ## Save files in the folder
-    pb <- progress_bar$new(format = paste0("[:bar] :current/:",
-                                           "total (:percent) in ",
-                                           ":elapsed"),
-                           total = length(list_files), clear = FALSE)
     res <- lapply(list_files, function(x) {
-        pb$tick()
         dest <- file.path(path, basename(x))
         if (file.exists(dest) && !overwrite) {
             message("File '", basename(x), "' already exists in '",
@@ -551,14 +544,8 @@ mwb_cached_data_files <- function(mwbId = character(),
 #' @noRd
 .mwb_data_files_post <- function(mwbId = character(), dfiles = NULL,
                                 bfc = NULL) {
-    pb <- progress_bar$new(format = paste0("[:bar] :current/:",
-                                            "total (:percent) in ",
-                                            ":elapsed"),
-                            total = nrow(dfiles), clear = FALSE)
-
     lfiles <- c()
     for (i in seq_len(nrow(dfiles))) {
-        pb$tick()
         params <- list(
             A = paste0(dfiles[i, "zip_file"]),
             F = paste0(dfiles[i, "sample_file"])
@@ -607,8 +594,6 @@ mwb_cached_data_files <- function(mwbId = character(),
 #' Download and cache data files for a given MWB ID via FTP server. This
 #' function is used by `.mwb_data_files()` when `ftp_zip = TRUE`.
 #'
-#' @importFrom progress progress_bar
-#'
 #' @importFrom archive archive_extract
 #'
 #' @importFrom MsCoreUtils retry
@@ -627,12 +612,7 @@ mwb_cached_data_files <- function(mwbId = character(),
     ## Cache files
     zip_files <- unique(dfiles$zip_file)
     ftp_url <- "ftp://www.metabolomicsworkbench.org/Studies/"
-    pb <- progress_bar$new(format = paste0("[:bar] :current/:",
-                                            "total (:percent) in ",
-                                            ":elapsed"),
-                            total = length(zip_files), clear = FALSE)
     res <- lapply(zip_files, function(z) {
-        pb$tick()
         invisible(capture.output(suppressMessages(
             f <- retry(bfcrpath(bfc, paste0(ftp_url, z), fname = "exact"),
                         sleep_mult = .sleep_mult(),

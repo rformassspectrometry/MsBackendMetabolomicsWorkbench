@@ -1,6 +1,6 @@
 Package: MsBackendMetabolomicsWorkbench
 Title: Retrieve Mass Spectrometry Data from Metabolomics Workbench
-Version: 0.1.8
+Version: 0.99.0
 Authors@R:
     c(person(given = "Gabriele", family = "Tomè",
              email = "gabriele.tome@eurac.edu",
@@ -33,7 +33,6 @@ Imports:
     BiocFileCache,
     S4Vectors,
     methods,
-    progress,
     MsCoreUtils (>= 1.23.9),
     jsonlite,
     plyr,
