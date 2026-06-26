@@ -15,11 +15,6 @@ archive name and the file name within that archive.
 Parameter pattern allows to filter the results by matching against the
 "sample_file" column. This function requires an active internet
 connection.
-mwb_rest_request(): queries the Metabolomics Workbench REST API for
-a given study/analysis ID and output item (e.g. "summary", "factors").
-Returns the raw response as a character string in the format specified
-by outputFormat ("json" or "txt"). This function requires an active
-internet connection.
 mwb_ftp_list_files(): queries the Metabolomics Workbench FTP server for a
 given experiment ID and returns the related files. Parameter pattern
 allows to filter the results. In contrast to mwb_list_files(), this
@@ -27,17 +22,23 @@ function lists only the files on the FTP server (like the zip file of the
 experiment), while mwb_list_files() lists the files contained within the
 zip file. Other files may also be present on the FTP server. This function
 requires an active internet connection.
-mwb_ftp_download(): download files from Metabolomics Workbench FTP
-server for a given experiment ID. Use pattern to filter files by name
-using a regular expression (by default all files are downloaded). Use
-path to set the destination directory for downloaded files. Only files
-listed by mwb_ftp_list_files() can be downloaded.
 mwb_metadata(): retrieves the metadata of a given MWB data set as a
 list with two data.frame: one with the metadata of the experiment and
 one with the sample annotation. The function handles the case of multiple
 analysis IDs by combining the metadata of all analysis IDs into a single
 data.frame for the experiment and a single data.frame for the sample
 annotation. This function requires an active internet connection.
+mwb_rest_request(): queries the Metabolomics Workbench REST API for
+a given study/analysis ID and output item (e.g. "summary", "factors").
+Returns the raw response as a character string in the format specified
+by outputFormat ("json" or "txt"). This function requires an active
+internet connection.
+mwb_ftp_download(): download files from Metabolomics Workbench FTP
+server for a given experiment ID. Use pattern to filter files by name
+using a regular expression (by default all files are downloaded). Use
+path to set the destination directory for downloaded files. Only files
+listed by mwb_ftp_list_files() can be downloaded. This function requires
+an active internet connection.
 mwb_sync_data_files(): synchronize data files of a specified
 MWB data set eventually downloading and locally caching them.
 Parameter fileName allows to specify names of selected data files to
@@ -63,11 +64,6 @@ archive name and the file name within that archive.
 Parameter pattern allows to filter the results by matching against the
 "sample_file" column. This function requires an active internet
 connection.
-mwb_rest_request(): queries the Metabolomics Workbench REST API for
-a given study/analysis ID and output item (e.g. "summary", "factors").
-Returns the raw response as a character string in the format specified
-by outputFormat ("json" or "txt"). This function requires an active
-internet connection.
 mwb_ftp_list_files(): queries the Metabolomics Workbench FTP server for a
 given experiment ID and returns the related files. Parameter pattern
 allows to filter the results. In contrast to mwb_list_files(), this
@@ -75,17 +71,23 @@ function lists only the files on the FTP server (like the zip file of the
 experiment), while mwb_list_files() lists the files contained within the
 zip file. Other files may also be present on the FTP server. This function
 requires an active internet connection.
-mwb_ftp_download(): download files from Metabolomics Workbench FTP
-server for a given experiment ID. Use pattern to filter files by name
-using a regular expression (by default all files are downloaded). Use
-path to set the destination directory for downloaded files. Only files
-listed by mwb_ftp_list_files() can be downloaded.
 mwb_metadata(): retrieves the metadata of a given MWB data set as a
 list with two data.frame: one with the metadata of the experiment and
 one with the sample annotation. The function handles the case of multiple
 analysis IDs by combining the metadata of all analysis IDs into a single
 data.frame for the experiment and a single data.frame for the sample
 annotation. This function requires an active internet connection.
+mwb_rest_request(): queries the Metabolomics Workbench REST API for
+a given study/analysis ID and output item (e.g. "summary", "factors").
+Returns the raw response as a character string in the format specified
+by outputFormat ("json" or "txt"). This function requires an active
+internet connection.
+mwb_ftp_download(): download files from Metabolomics Workbench FTP
+server for a given experiment ID. Use pattern to filter files by name
+using a regular expression (by default all files are downloaded). Use
+path to set the destination directory for downloaded files. Only files
+listed by mwb_ftp_list_files() can be downloaded. This function requires
+an active internet connection.
 mwb_sync_data_files(): synchronize data files of a specified
 MWB data set eventually downloading and locally caching them.
 Parameter fileName allows to specify names of selected data files to
@@ -103,7 +105,7 @@ change any other data eventually present in the local BiocFileCache.
 
     <a class="navbar-brand me-2" href="../index.html">MsBackendMetabolomicsWorkbench</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.7</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -146,11 +148,6 @@ archive name and the file name within that archive.
 Parameter <code>pattern</code> allows to filter the results by matching against the
 <code>"sample_file"</code> column. This function requires an active internet
 connection.</p></li>
-<li><p><code>mwb_rest_request()</code>: queries the Metabolomics Workbench REST API for
-a given study/analysis ID and output item (e.g. <code>"summary"</code>, <code>"factors"</code>).
-Returns the raw response as a <code>character</code> string in the format specified
-by <code>outputFormat</code> (<code>"json"</code> or <code>"txt"</code>). This function requires an active
-internet connection.</p></li>
 <li><p><code>mwb_ftp_list_files()</code>: queries the Metabolomics Workbench FTP server for a
 given experiment ID and returns the related files. Parameter <code>pattern</code>
 allows to filter the results. In contrast to <code>mwb_list_files()</code>, this
@@ -158,17 +155,23 @@ function lists only the files on the FTP server (like the zip file of the
 experiment), while <code>mwb_list_files()</code> lists the files contained within the
 zip file. Other files may also be present on the FTP server. This function
 requires an active internet connection.</p></li>
-<li><p><code>mwb_ftp_download()</code>: download files from Metabolomics Workbench FTP
-server for a given experiment ID. Use <code>pattern</code> to filter files by name
-using a regular expression (by default all files are downloaded). Use
-<code>path</code> to set the destination directory for downloaded files. Only files
-listed by <code>mwb_ftp_list_files()</code> can be downloaded.</p></li>
 <li><p><code>mwb_metadata()</code>: retrieves the metadata of a given MWB data set as a
 <code>list</code> with two <code>data.frame</code>: one with the metadata of the experiment and
 one with the sample annotation. The function handles the case of multiple
 analysis IDs by combining the metadata of all analysis IDs into a single
 <code>data.frame</code> for the experiment and a single <code>data.frame</code> for the sample
 annotation. This function requires an active internet connection.</p></li>
+<li><p><code>mwb_rest_request()</code>: queries the Metabolomics Workbench REST API for
+a given study/analysis ID and output item (e.g. <code>"summary"</code>, <code>"factors"</code>).
+Returns the raw response as a <code>character</code> string in the format specified
+by <code>outputFormat</code> (<code>"json"</code> or <code>"txt"</code>). This function requires an active
+internet connection.</p></li>
+<li><p><code>mwb_ftp_download()</code>: download files from Metabolomics Workbench FTP
+server for a given experiment ID. Use <code>pattern</code> to filter files by name
+using a regular expression (by default all files are downloaded). Use
+<code>path</code> to set the destination directory for downloaded files. Only files
+listed by <code>mwb_ftp_list_files()</code> can be downloaded. This function requires
+an active internet connection.</p></li>
 <li><p><code>mwb_sync_data_files()</code>: synchronize data files of a specified
 MWB data set eventually downloading and locally caching them.
 Parameter <code>fileName</code> allows to specify names of selected data files to
@@ -228,11 +231,11 @@ starting with a <em>ST</em> followed by a number).</p></dd>
 
 <dt id="arg-pattern">pattern<a class="anchor" aria-label="anchor" href="#arg-pattern"></a></dt>
 <dd><p>for <code>mwb_list_files()</code>, <code>mwb_sync_data_files()</code>,
-<code>mwb_cached_data_files()</code>, <code>mwb_ftp_list_files</code> and <code>mwb_ftp_download</code>:
-<code>character(1)</code> defining a pattern to filter the file names, such as
-<code>pattern = "mzML$"</code> to retrieve the file names of all files of the data
-set (i.e., files with extension <code>"mzML"</code>). This parameter is passed to
-the <code><a href="https://rdrr.io/r/base/grep.html" class="external-link">grepl()</a></code> function.</p></dd>
+<code>mwb_cached_data_files()</code>, <code>mwb_ftp_list_files()</code> and
+<code>mwb_ftp_download()</code>: <code>character(1)</code> defining a pattern to filter the
+file names, such as <code>pattern = "mzML$"</code> to retrieve the file names of
+all files of the data set (i.e., files with extension <code>"mzML"</code>). This
+parameter is passed to the <code><a href="https://rdrr.io/r/base/grep.html" class="external-link">grepl()</a></code> function.</p></dd>
 
 
 <dt id="arg-id">id<a class="anchor" aria-label="anchor" href="#arg-id"></a></dt>
@@ -264,8 +267,8 @@ Workbench data set/experiment.</p></dd>
 
 
 <dt id="arg-path">path<a class="anchor" aria-label="anchor" href="#arg-path"></a></dt>
-<dd><p>for <code>mwb_ftp_download()</code>: optional <code>character</code> defining the
-directory where download the files.</p></dd>
+<dd><p>for <code>mwb_ftp_download()</code>: optional <code>character(1)</code> defining the
+local directory where files should be downloaded.</p></dd>
 
 
 <dt id="arg-overwrite">overwrite<a class="anchor" aria-label="anchor" href="#arg-overwrite"></a></dt>
@@ -297,10 +300,10 @@ body, formatted as JSON or plain text depending on <code>outputFormat</code>.</p
 <li><p>For <code>mwb_sync_data_files()</code> and <code>mwb_cached_data_files()</code>: a
 <code>data.frame</code> with the MWB ID, the name(s) and remote and
 local file names of the synchronized data files.</p></li>
-<li><p>For <code>mwb_ftp_list_files</code>: <code>character</code> with the files in FTP server for a
+<li><p>For <code>mwb_ftp_list_files()</code>: <code>character</code> with the files in FTP server for a
 specific ID.</p></li>
-<li><p>For <code>mwb_metadata</code>: <code>list</code> with two <code>data.frame</code>: one with the metadata of
-the experiment and one with the sample annotation.</p></li>
+<li><p>For <code>mwb_metadata()</code>: <code>list</code> with two <code>data.frame</code>: one with the metadata
+of the experiment and one with the sample annotation.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>

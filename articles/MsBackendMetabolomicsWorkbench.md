@@ -9,8 +9,8 @@ Bolzano under the Joint Projects South Tyrol–Germany 2025 program.),
 Philippine Louail \[aut\] (ORCID:
 <https://orcid.org/0009-0007-5429-6846>), Johannes Rainer \[aut\]
 (ORCID: <https://orcid.org/0000-0002-6977-7147>)\
-**Last modified:** 2026-06-23 09:34:04.650163\
-**Compiled**: Tue Jun 23 09:41:09 2026
+**Last modified:** 2026-06-26 14:16:59.076978\
+**Compiled**: Fri Jun 26 14:23:05 2026
 
 ## Introduction
 
@@ -190,29 +190,26 @@ spectraData(s, c("mwb_id", "zip_file", "file_name"))
     ## DataFrame with 5751 rows and 3 columns
     ##           mwb_id          zip_file              file_name
     ##      <character>       <character>            <character>
-    ## 1       ST002115 ST002115_Data.zip ST002115_Data_HT1080..
-    ## 2       ST002115 ST002115_Data.zip ST002115_Data_HT1080..
-    ## 3       ST002115 ST002115_Data.zip ST002115_Data_HT1080..
-    ## 4       ST002115 ST002115_Data.zip ST002115_Data_HT1080..
-    ## 5       ST002115 ST002115_Data.zip ST002115_Data_HT1080..
+    ## 1       ST002115 ST002115_Data.zip HT1080_DMSO_01_RP.mz..
+    ## 2       ST002115 ST002115_Data.zip HT1080_DMSO_01_RP.mz..
+    ## 3       ST002115 ST002115_Data.zip HT1080_DMSO_01_RP.mz..
+    ## 4       ST002115 ST002115_Data.zip HT1080_DMSO_01_RP.mz..
+    ## 5       ST002115 ST002115_Data.zip HT1080_DMSO_01_RP.mz..
     ## ...          ...               ...                    ...
-    ## 5747    ST002115 ST002115_Data.zip ST002115_Data_HT1080..
-    ## 5748    ST002115 ST002115_Data.zip ST002115_Data_HT1080..
-    ## 5749    ST002115 ST002115_Data.zip ST002115_Data_HT1080..
-    ## 5750    ST002115 ST002115_Data.zip ST002115_Data_HT1080..
-    ## 5751    ST002115 ST002115_Data.zip ST002115_Data_HT1080..
+    ## 5747    ST002115 ST002115_Data.zip HT1080_RSL3_01_RP.mz..
+    ## 5748    ST002115 ST002115_Data.zip HT1080_RSL3_01_RP.mz..
+    ## 5749    ST002115 ST002115_Data.zip HT1080_RSL3_01_RP.mz..
+    ## 5750    ST002115 ST002115_Data.zip HT1080_RSL3_01_RP.mz..
+    ## 5751    ST002115 ST002115_Data.zip HT1080_RSL3_01_RP.mz..
 
 ``` r
 
 basename(s$file_name) |> head()
 ```
 
-    ## [1] "ST002115_Data_HT1080_DMSO_01_RP.mzXML"
-    ## [2] "ST002115_Data_HT1080_DMSO_01_RP.mzXML"
-    ## [3] "ST002115_Data_HT1080_DMSO_01_RP.mzXML"
-    ## [4] "ST002115_Data_HT1080_DMSO_01_RP.mzXML"
-    ## [5] "ST002115_Data_HT1080_DMSO_01_RP.mzXML"
-    ## [6] "ST002115_Data_HT1080_DMSO_01_RP.mzXML"
+    ## [1] "HT1080_DMSO_01_RP.mzXML" "HT1080_DMSO_01_RP.mzXML"
+    ## [3] "HT1080_DMSO_01_RP.mzXML" "HT1080_DMSO_01_RP.mzXML"
+    ## [5] "HT1080_DMSO_01_RP.mzXML" "HT1080_DMSO_01_RP.mzXML"
 
 The
 [`mwb_sync()`](https://rformassspectrometry.github.io/MsBackendMetabolomicsWorkbench/reference/MsBackendMetabolomicsWorkbench.md)
@@ -266,8 +263,8 @@ res <- mwb_sync_data_files("ST002115",
 res
 ```
 
-    ##     rid   mwb_id          zip_file                             file_name
-    ## 2 BFC36 ST002115 ST002115_Data.zip ST002115_Data_HT1080_DMSO_01_RP.mzXML
+    ##     rid   mwb_id          zip_file               file_name
+    ## 2 BFC36 ST002115 ST002115_Data.zip HT1080_DMSO_01_RP.mzXML
     ##                                                                       rpath
     ## 2 /github/home/.cache/R/BiocFileCache/ST002115_Data_HT1080_DMSO_01_RP.mzXML
 
@@ -283,20 +280,13 @@ settings, a `data.frame` with all available data files is returned.
 mwb_cached_data_files()
 ```
 
-    ##      rid   mwb_id          zip_file
-    ## 11 BFC35 ST002115 ST002115_Data.zip
-    ## 12 BFC36 ST002115 ST002115_Data.zip
-    ## 13 BFC37 ST000016 ST000016_mzML.zip
-    ## 14 BFC38 ST002115 ST002115_Data.zip
-    ## 15 BFC39 ST002115 ST002115_Data.zip
-    ## 16 BFC40 ST002115 ST002115_Data.zip
-    ##                                             file_name
-    ## 11              ST002115_Data_HT1080_DMSO_02_RP.mzXML
-    ## 12              ST002115_Data_HT1080_DMSO_01_RP.mzXML
-    ## 13 ST000016_mzML_D20101022-LC2-PP0000705-A1-I1-P.mzML
-    ## 14             ST002115_Data_HT1080_ML162_01_RP.mzXML
-    ## 15             ST002115_Data_HT1080_ML210_01_RP.mzXML
-    ## 16              ST002115_Data_HT1080_RSL3_01_RP.mzXML
+    ##      rid   mwb_id          zip_file                            file_name
+    ## 11 BFC35 ST002115 ST002115_Data.zip              HT1080_DMSO_02_RP.mzXML
+    ## 12 BFC36 ST002115 ST002115_Data.zip              HT1080_DMSO_01_RP.mzXML
+    ## 13 BFC37 ST000016 ST000016_mzML.zip D20101022-LC2-PP0000705-A1-I1-P.mzML
+    ## 14 BFC38 ST002115 ST002115_Data.zip             HT1080_ML162_01_RP.mzXML
+    ## 15 BFC39 ST002115 ST002115_Data.zip             HT1080_ML210_01_RP.mzXML
+    ## 16 BFC40 ST002115 ST002115_Data.zip              HT1080_RSL3_01_RP.mzXML
     ##                                                                                     rpath
     ## 11              /github/home/.cache/R/BiocFileCache/ST002115_Data_HT1080_DMSO_02_RP.mzXML
     ## 12              /github/home/.cache/R/BiocFileCache/ST002115_Data_HT1080_DMSO_01_RP.mzXML
@@ -555,35 +545,33 @@ sessionInfo()
     ## [8] base     
     ## 
     ## other attached packages:
-    ## [1] MsBackendMetabolomicsWorkbench_0.1.7 jsonlite_2.0.0                      
-    ## [3] Spectra_1.23.3                       BiocParallel_1.47.0                 
-    ## [5] S4Vectors_0.51.3                     BiocGenerics_0.59.7                 
-    ## [7] generics_0.1.4                       BiocStyle_2.41.0                    
+    ## [1] MsBackendMetabolomicsWorkbench_0.99.0 jsonlite_2.0.0                       
+    ## [3] Spectra_1.23.3                        BiocParallel_1.47.0                  
+    ## [5] S4Vectors_0.51.3                      BiocGenerics_0.59.7                  
+    ## [7] generics_0.1.4                        BiocStyle_2.41.0                     
     ## 
     ## loaded via a namespace (and not attached):
-    ##  [1] xfun_0.59              bslib_0.11.0           httr2_1.2.2           
+    ##  [1] xfun_0.59              bslib_0.11.0           httr2_1.2.3           
     ##  [4] htmlwidgets_1.6.4      Biobase_2.73.1         vctrs_0.7.3           
     ##  [7] tools_4.6.0            curl_7.1.0             parallel_4.6.0        
     ## [10] tibble_3.3.1           RSQLite_3.53.2         cluster_2.1.8.2       
     ## [13] blob_1.3.0             pkgconfig_2.0.3        data.table_1.18.4     
     ## [16] dbplyr_2.6.0           desc_1.4.3             lifecycle_1.0.5       
-    ## [19] stringr_1.6.0          compiler_4.6.0         textshaping_1.0.5     
-    ## [22] progress_1.2.3         codetools_0.2-20       ncdf4_1.24            
-    ## [25] clue_0.3-68            htmltools_0.5.9        sass_0.4.10           
-    ## [28] yaml_2.3.12            tidyr_1.3.2            pkgdown_2.2.0.9000    
-    ## [31] pillar_1.11.1          crayon_1.5.3           jquerylib_0.1.4       
-    ## [34] MASS_7.3-65            cachem_1.1.0           MetaboCoreUtils_1.21.1
-    ## [37] rvest_1.0.5            tidyselect_1.2.1       digest_0.6.39         
-    ## [40] stringi_1.8.7          purrr_1.2.2            dplyr_1.2.1           
-    ## [43] bookdown_0.47          fastmap_1.2.0          archive_1.1.13        
-    ## [46] cli_3.6.6              magrittr_2.0.5         withr_3.0.3           
-    ## [49] prettyunits_1.2.0      filelock_1.0.3         rappdirs_0.3.4        
-    ## [52] bit64_4.8.2            httr_1.4.8             rmarkdown_2.31        
-    ## [55] bit_4.6.0              otel_0.2.0             hms_1.1.4             
-    ## [58] ragg_1.5.2             memoise_2.0.1          evaluate_1.0.5        
-    ## [61] knitr_1.51             IRanges_2.47.2         BiocFileCache_3.3.0   
-    ## [64] rlang_1.2.0            Rcpp_1.1.1-1.1         glue_1.8.1            
-    ## [67] DBI_1.3.0              mzR_2.47.0             selectr_0.5-1         
-    ## [70] xml2_1.6.0             BiocManager_1.30.27    R6_2.6.1              
-    ## [73] plyr_1.8.9             systemfonts_1.3.2      fs_2.1.0              
-    ## [76] ProtGenerics_1.45.0    MsCoreUtils_1.25.4
+    ## [19] compiler_4.6.0         textshaping_1.0.5      codetools_0.2-20      
+    ## [22] ncdf4_1.24             clue_0.3-68            htmltools_0.5.9       
+    ## [25] sass_0.4.10            yaml_2.3.12            tidyr_1.3.2           
+    ## [28] pkgdown_2.2.0.9000     pillar_1.11.1          jquerylib_0.1.4       
+    ## [31] MASS_7.3-65            cachem_1.1.0           MetaboCoreUtils_1.21.1
+    ## [34] tidyselect_1.2.1       rvest_1.0.5            digest_0.6.39         
+    ## [37] purrr_1.2.2            dplyr_1.2.1            bookdown_0.47         
+    ## [40] fastmap_1.2.0          archive_1.1.13         cli_3.6.6             
+    ## [43] magrittr_2.0.5         withr_3.0.3            filelock_1.0.3        
+    ## [46] rappdirs_0.3.4         bit64_4.8.2            rmarkdown_2.31        
+    ## [49] httr_1.4.8             bit_4.6.0              otel_0.2.0            
+    ## [52] ragg_1.5.2             memoise_2.0.1          evaluate_1.0.5        
+    ## [55] knitr_1.51             IRanges_2.47.2         BiocFileCache_3.3.0   
+    ## [58] rlang_1.2.0            Rcpp_1.1.1-1.1         glue_1.8.1            
+    ## [61] DBI_1.3.0              mzR_2.47.0             selectr_0.6-0         
+    ## [64] xml2_1.6.0             BiocManager_1.30.27    R6_2.6.1              
+    ## [67] plyr_1.8.9             systemfonts_1.3.2      fs_2.1.0              
+    ## [70] ProtGenerics_1.45.0    MsCoreUtils_1.25.4

@@ -19,12 +19,6 @@ files and study metadata.
   the `"sample_file"` column. This function requires an active internet
   connection.
 
-- `mwb_rest_request()`: queries the Metabolomics Workbench REST API for
-  a given study/analysis ID and output item (e.g. `"summary"`,
-  `"factors"`). Returns the raw response as a `character` string in the
-  format specified by `outputFormat` (`"json"` or `"txt"`). This
-  function requires an active internet connection.
-
 - `mwb_ftp_list_files()`: queries the Metabolomics Workbench FTP server
   for a given experiment ID and returns the related files. Parameter
   `pattern` allows to filter the results. In contrast to
@@ -34,12 +28,6 @@ files and study metadata.
   present on the FTP server. This function requires an active internet
   connection.
 
-- `mwb_ftp_download()`: download files from Metabolomics Workbench FTP
-  server for a given experiment ID. Use `pattern` to filter files by
-  name using a regular expression (by default all files are downloaded).
-  Use `path` to set the destination directory for downloaded files. Only
-  files listed by `mwb_ftp_list_files()` can be downloaded.
-
 - `mwb_metadata()`: retrieves the metadata of a given MWB data set as a
   `list` with two `data.frame`: one with the metadata of the experiment
   and one with the sample annotation. The function handles the case of
@@ -47,6 +35,19 @@ files and study metadata.
   into a single `data.frame` for the experiment and a single
   `data.frame` for the sample annotation. This function requires an
   active internet connection.
+
+- `mwb_rest_request()`: queries the Metabolomics Workbench REST API for
+  a given study/analysis ID and output item (e.g. `"summary"`,
+  `"factors"`). Returns the raw response as a `character` string in the
+  format specified by `outputFormat` (`"json"` or `"txt"`). This
+  function requires an active internet connection.
+
+- `mwb_ftp_download()`: download files from Metabolomics Workbench FTP
+  server for a given experiment ID. Use `pattern` to filter files by
+  name using a regular expression (by default all files are downloaded).
+  Use `path` to set the destination directory for downloaded files. Only
+  files listed by `mwb_ftp_list_files()` can be downloaded. This
+  function requires an active internet connection.
 
 - `mwb_sync_data_files()`: synchronize data files of a specified MWB
   data set eventually downloading and locally caching them. Parameter
@@ -106,8 +107,8 @@ mwb_delete_cache(mwbId = character())
 - pattern:
 
   for `mwb_list_files()`, `mwb_sync_data_files()`,
-  `mwb_cached_data_files()`, `mwb_ftp_list_files` and
-  `mwb_ftp_download`: `character(1)` defining a pattern to filter the
+  `mwb_cached_data_files()`, `mwb_ftp_list_files()` and
+  `mwb_ftp_download()`: `character(1)` defining a pattern to filter the
   file names, such as `pattern = "mzML$"` to retrieve the file names of
   all files of the data set (i.e., files with extension `"mzML"`). This
   parameter is passed to the
@@ -143,8 +144,8 @@ mwb_delete_cache(mwbId = character())
 
 - path:
 
-  for `mwb_ftp_download()`: optional `character` defining the directory
-  where download the files.
+  for `mwb_ftp_download()`: optional `character(1)` defining the local
+  directory where files should be downloaded.
 
 - overwrite:
 
@@ -178,10 +179,10 @@ mwb_delete_cache(mwbId = character())
   `data.frame` with the MWB ID, the name(s) and remote and local file
   names of the synchronized data files.
 
-- For `mwb_ftp_list_files`: `character` with the files in FTP server for
-  a specific ID.
+- For `mwb_ftp_list_files()`: `character` with the files in FTP server
+  for a specific ID.
 
-- For `mwb_metadata`: `list` with two `data.frame`: one with the
+- For `mwb_metadata()`: `list` with two `data.frame`: one with the
   metadata of the experiment and one with the sample annotation.
 
 ## Details
