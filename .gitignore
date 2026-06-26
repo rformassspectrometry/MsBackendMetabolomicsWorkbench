@@ -32,6 +32,4 @@ local_data
 *.seed
 *.settings
 *.tm_properties
-.editorconfig
-.Rbuildignore
 

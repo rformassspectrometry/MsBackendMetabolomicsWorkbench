@@ -118,7 +118,7 @@
 #'     output format of the metadata. The supported output are `json` and `txt`.
 #'
 #' @param path for `mwb_ftp_download()`: optional `character(1)` defining the
-#'     directory where download the files.
+#'     local directory where files should be downloaded.
 #'
 #' @param overwrite for `mwb_ftp_download()`: `logical(1)` whether
 #'     existing files should be overwritten. Defaults to `FALSE`, in which

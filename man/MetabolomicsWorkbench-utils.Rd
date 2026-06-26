@@ -77,7 +77,7 @@ output format of the metadata. The supported output are \code{json} and \code{tx
 Workbench data set/experiment.}
 
 \item{path}{for \code{mwb_ftp_download()}: optional \code{character(1)} defining the
-directory where download the files.}
+local directory where files should be downloaded.}
 
 \item{overwrite}{for \code{mwb_ftp_download()}: \code{logical(1)} whether
 existing files should be overwritten. Defaults to \code{FALSE}, in which
