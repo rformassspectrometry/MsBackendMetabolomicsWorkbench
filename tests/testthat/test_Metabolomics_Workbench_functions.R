@@ -100,9 +100,7 @@ test_that(".mwb_data_files_ftp works", {
 
 test_that(".mwb_data_files_post works", {
     dfiles <- mwb_list_files(x = "ST002115", pattern = "01_RP.mzXML$")
-    dfiles$parsed_name <- paste0(file_path_sans_ext(dfiles$zip_file,
-                                                    compression = TRUE), "_",
-                                 basename(dfiles$sample_file))
+    dfiles$parsed_name <- basename(dfiles$sample_file)
 
     bfc <- BiocFileCache()
 
@@ -125,9 +123,8 @@ test_that(".mwb_data_files_post works", {
 
     ## Test .tar.gz extractor
     dfiles <- mwb_list_files(x = "ST001357", pattern = "124.mzML$")
-    dfiles$parsed_name <- paste0(file_path_sans_ext(dfiles$zip_file,
-                                                    compression = TRUE), "_",
-                basename(URLdecode(gsub("\\+", "%20", dfiles$sample_file))))
+    dfiles$parsed_name <- basename(URLdecode(gsub("\\+", "%20",
+                                                    dfiles$sample_file)))
     bfc <- BiocFileCache()
     res <- .mwb_data_files_post(mwbId = "ST001357", dfiles = dfiles, bfc = bfc)
     expect_true(is.list(res))
@@ -258,7 +255,7 @@ test_that("mwb_ftp_download works", {
     with_mocked_bindings(
         "download.file" = function(...) stop("request failed"),
         expect_error(
-            mwb_ftp_download("ST000909", pattern = ".txt", path = tempdir()),
+            mwb_ftp_download("ST004675", pattern = ".zip", path = tempdir()),
             "Failed to connect to Metabolomics Workbench"
         )
     )
@@ -266,30 +263,30 @@ test_that("mwb_ftp_download works", {
     ## Test creation directory
     tmp <- file.path(tempdir(), paste0("test_", sample(1e6, 1)))
     on.exit(unlink(tmp, recursive = TRUE))
-    suppressWarnings(mwb_ftp_download("ST000909", pattern = ".txt", path = tmp))
+    suppressWarnings(mwb_ftp_download("ST004675", pattern = ".zip", path = tmp))
     expect_true(dir.exists(tmp))
-    expect_true(file.exists(paste0(tmp, "/ST000909_AN001476_Results.txt")))
+    expect_true(file.exists(paste0(tmp, "/ST004675_Rawfiles.zip")))
 
     ## Test overwrite = FALSE (default): file should be skipped
     mtime_before <- file.info(file.path(tmp,
-                                        "ST000909_AN001476_Results.txt"))$mtime
+                                        "ST004675_Rawfiles.zip"))$mtime
     expect_message(
         suppressWarnings(
-            mwb_ftp_download("ST000909", pattern = ".txt", path = tmp)
+            mwb_ftp_download("ST004675", pattern = ".zip", path = tmp)
         ),
         "already exists"
     )
     mtime_after <- file.info(file.path(tmp,
-                                       "ST000909_AN001476_Results.txt"))$mtime
+                                       "ST004675_Rawfiles.zip"))$mtime
     expect_equal(mtime_before, mtime_after)
 
     ## Test overwrite = TRUE: file should be re-downloaded
     suppressWarnings(
-        mwb_ftp_download("ST000909", pattern = ".txt", path = tmp,
+        mwb_ftp_download("ST004675", pattern = ".zip", path = tmp,
                          overwrite = TRUE)
     )
     mtime_overwritten <- file.info(
-        file.path(tmp, "ST000909_AN001476_Results.txt"))$mtime
+        file.path(tmp, "ST004675_Rawfiles.zip"))$mtime
     expect_true(mtime_overwritten > mtime_before)
 })
 
@@ -320,5 +317,5 @@ test_that("mwb_metadata works", {
 })
 
 test_that(".sleep_mult works", {
-    expect_equal(.sleep_mult(), 7L)
+    expect_equal(.sleep_mult(), 5L)
 })

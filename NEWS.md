@@ -1,4 +1,16 @@
+# MsBackendMetabolomicsWorkbench 0.99
+
+## Changes in 0.99.0
+
+- Remove `progress` import.
+- Update to 0.99.0 for Bioconductor submission.
+
 # MsBackendMetabolomicsWorkbench 0.1
+
+## Changes in 0.1.8
+
+- Update the filename in `BiocFileCache` table.
+- Minor update for Bioconductor submission.
 
 ## Changes in 0.1.7
 
