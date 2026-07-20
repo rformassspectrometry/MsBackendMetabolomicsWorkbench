@@ -1,5 +1,13 @@
 # MsBackendMetabolomicsWorkbench 0.99
 
+## Changes in 0.99.1
+
+- Update `.Rbuildignore` to include of `NEWS.md`.
+- Update installation instruction.
+- Named vignette chunks.
+- Refactor `mwb_sync()` to accept `Spectra` object and avoid `"@"` call in
+  vignette.
+
 ## Changes in 0.99.0
 
 - Remove `progress` import.

@@ -94,6 +94,14 @@ test_that("mwb_sync works", {
     expect_equal(rtime(x), rtime(res))
     expect_equal(mz(x[1:50]), mz(res[1:50]))
 
+    ## Sync based on spectra object
+    s <- Spectra::Spectra("ST002115", filePattern = "DMSO_02_RP.mzXML$",
+                          ftp_zip = FALSE,
+                          source = MsBackendMetabolomicsWorkbench())
+    res_s <- mwb_sync(s, offline = TRUE)
+    expect_equal(rtime(s), rtime(res_s))
+    expect_equal(mz(s[1:50]), mz(res_s[1:50]))
+
     ## Remove local content.
     mwb_delete_cache("ST002115")
     expect_error(mwb_sync(x, offline = TRUE),

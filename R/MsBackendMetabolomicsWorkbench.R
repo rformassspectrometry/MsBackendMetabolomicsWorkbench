@@ -258,6 +258,9 @@ setValidity("MsBackendMetabolomicsWorkbench", function(object) {
 #'
 #' @export
 mwb_sync <- function(x, offline = FALSE) {
+    if (inherits(x, "Spectra"))
+        x <- x@backend
+
     if (!inherits(x, "MsBackendMetabolomicsWorkbench"))
         stop("'x' is expected to be an instance of ",
              "'MsBackendMetabolomicsWorkbench'")
