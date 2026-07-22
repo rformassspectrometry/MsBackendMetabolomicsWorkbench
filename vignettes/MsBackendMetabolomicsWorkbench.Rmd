@@ -20,12 +20,6 @@ BiocStyle::markdown()
 **Last modified:** `r file.info("MsBackendMetabolomicsWorkbench.Rmd")$mtime`<br />
 **Compiled**: `r date()`
 
-```{r, echo = FALSE, message = FALSE}
-library(Spectra)
-library(BiocStyle)
-library(jsonlite)
-```
-
 # Introduction
 
 Metabolomics experiments and results including mass spectrometry (MS) data can
@@ -48,11 +42,11 @@ integrating cached MS data directly into R.
 
 The package can be installed from within R with the commands below:
 
-```{r, eval = FALSE}
+```{r install_package, eval = FALSE}
 if (!requireNamespace("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
 
-BiocManager::install("RforMassSpectrometry/MsBackendMetabolomicsWorkbench")
+BiocManager::install("MsBackendMetabolomicsWorkbench")
 ```
 
 # Importing MS Data from Metabolomics Workbench
@@ -67,7 +61,7 @@ supported MS files (mzML/CDF/mzXML) into a local cache, then load them into a
 
 Below we list all files from Metabolomics Workbench experiment *ST002115*.
 
-```{r}
+```{r mwb_list_files}
 library(MsBackendMetabolomicsWorkbench)
 
 #' List files of a Metabolomics Workbench data set
@@ -86,7 +80,7 @@ are two supported download modes:
 
 Below we list zip file of Metabolomics Workbench experiment *ST002115*.
 
-```{r}
+```{r mwb_ftp_list_files}
 #' List zipped FTP files for a Metabolomics Workbench data set
 mwb_ftp_list_files("ST002115")
 ```
@@ -99,7 +93,7 @@ files to reduce the amount of data that needs to be downloaded. To this end we
 define a pattern matching the file name of only some data files using the
 `filePattern` parameter.
 
-```{r}
+```{r spectra_load}
 library(Spectra)
 
 #' Load MS data files of one data set
@@ -122,7 +116,7 @@ additional information related to the Metabolomics Workbench data set are
 available as specific *spectra variables*. We list all available spectra
 variables of the data set below.
 
-```{r}
+```{r spectra_variables}
 spectraVariables(s)
 ```
 
@@ -131,7 +125,7 @@ The Metabolomics Workbench-specific variables are `"mwb_id"`, `"zip_file"` and
 file name in the FTP server and the original data file name in the Metabolomics
 Workbench for each individual spectrum.
 
-```{r}
+```{r spectra_head}
 spectraData(s, c("mwb_id", "zip_file", "file_name"))
 basename(s$file_name) |> head()
 ```
@@ -141,12 +135,12 @@ a `MsBackendMetabolomicsWorkbench` and is useful if, for example, locally cached
 files were deleted. The function checks if all data files of the backend are
 available locally and eventually downloads and caches missing files.
 
-```{r, echo = FALSE}
+```{r sleep, echo = FALSE}
 Sys.sleep(4)
 ```
 
-```{r}
-mwb_sync(s@backend)
+```{r sync_cache}
+mwb_sync(s)
 ```
 
 In addition, it is also possible to *manually* cache and download selected files
@@ -158,7 +152,7 @@ cached file(s). Below we use this function to retrieve the local storage
 information on one of the data files of the Metabolomics Workbench data set
 *ST002115*:
 
-```{r}
+```{r mwb_sync_data_files}
 res <- mwb_sync_data_files("ST002115",
                             fileName = "HT1080_DMSO_01_RP.mzXML")
 res
@@ -169,7 +163,7 @@ locally cached Metabolomics Workbench data files. This function does not require
 an active internet connection since only local content is queried. With the
 default settings, a `data.frame` with all available data files is returned.
 
-```{r}
+```{r mwb_cached_data_files}
 mwb_cached_data_files()
 ```
 
@@ -191,7 +185,9 @@ response as a `character` string in the format specified by `outputFormat`
 Below we query the REST API for the summary of the Metabolomics Workbench data
 set *ST002115*:
 
-```{r}
+```{r mwb_rest_request_json}
+library(jsonlite)
+
 summary <- mwb_rest_request("ST002115", outputItem = "summary",
                             outputFormat = "json")
 fromJSON(summary)
@@ -202,7 +198,7 @@ experiment (directly, i.e., without caching). As an example we download below
 the zip archive to a temporary folder. In our example below we do not run it to
 reduce the amount of data that needs to be downloaded.
 
-```{r, eval = FALSE}
+```{r example_mwb_ftp_download, eval = FALSE}
 mwb_ftp_download("ST002115", path = tempdir())
 ```
 
@@ -220,7 +216,7 @@ of all analysis IDs into a single `data.frame` for the experiment and a single
 
 Below we retrieve the metadata of the data set *ST002115*:
 
-```{r}
+```{r mwb_metadata}
 meta <- mwb_metadata("ST002115")
 meta$MS_run
 meta$sample_annotation
@@ -228,6 +224,6 @@ meta$sample_annotation
 
 # Session information
 
-```{r}
+```{r session_info}
 sessionInfo()
 ```

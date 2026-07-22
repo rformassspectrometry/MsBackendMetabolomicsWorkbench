@@ -254,15 +254,21 @@ setValidity("MsBackendMetabolomicsWorkbench", function(object) {
 
 #' @importFrom methods validObject
 #'
+#' @importFrom Spectra Spectra
+#'
 #' @rdname MsBackendMetabolomicsWorkbench
 #'
 #' @export
 mwb_sync <- function(x, offline = FALSE) {
-    if (!inherits(x, "MsBackendMetabolomicsWorkbench"))
+    o <- x
+    if (inherits(x, "Spectra"))
+        o <- o@backend
+
+    if (!inherits(o, "MsBackendMetabolomicsWorkbench"))
         stop("'x' is expected to be an instance of ",
              "'MsBackendMetabolomicsWorkbench'")
     sdata <- unique(
-        as.data.frame(x@spectraData[, c("mwb_id", "file_name")]))
+        as.data.frame(o@spectraData[, c("mwb_id", "file_name")]))
     cn <- c("file_name", "rpath")
     res <- lapply(split(sdata, sdata$mwb_id), function(z, offline) {
         if (offline)
@@ -279,9 +285,13 @@ mwb_sync <- function(x, offline = FALSE) {
         stop("Some of the data files are not available. Please run with ",
              "'offline = FALSE' to ensure data missing data files get ",
              "downloaded.")
-    x@spectraData$dataStorage <- res[match(
-        x@spectraData$file_name,
+    o@spectraData$dataStorage <- res[match(
+        o@spectraData$file_name,
         res$file_name), "rpath"]
-    validObject(x)
-    x
+    validObject(o)
+
+    if (inherits(x, "Spectra"))
+        o <- Spectra(o)
+
+    o
 }
