@@ -9,8 +9,8 @@ Bolzano under the Joint Projects South Tyrol–Germany 2025 program.),
 Philippine Louail \[aut\] (ORCID:
 <https://orcid.org/0009-0007-5429-6846>), Johannes Rainer \[aut\]
 (ORCID: <https://orcid.org/0000-0002-6977-7147>)\
-**Last modified:** 2026-07-22 09:39:18.319809\
-**Compiled**: Wed Jul 22 09:46:36 2026
+**Last modified:** 2026-08-05 09:24:27.814124\
+**Compiled**: Wed Aug 5 09:31:04 2026
 
 ## Introduction
 
@@ -603,14 +603,14 @@ sessionInfo()
     ## other attached packages:
     ## [1] jsonlite_2.0.0                        MsBackendMetabolomicsWorkbench_0.99.1
     ## [3] Spectra_1.23.3                        BiocParallel_1.47.0                  
-    ## [5] S4Vectors_0.51.5                      BiocGenerics_0.59.10                 
+    ## [5] S4Vectors_0.51.6                      BiocGenerics_0.59.10                 
     ## [7] generics_0.1.4                        BiocStyle_2.41.0                     
     ## 
     ## loaded via a namespace (and not attached):
-    ##  [1] xfun_0.60              bslib_0.11.0           httr2_1.3.0           
-    ##  [4] htmlwidgets_1.6.4      Biobase_2.73.1         vctrs_0.7.3           
+    ##  [1] xfun_0.60              bslib_0.12.0           httr2_1.3.0           
+    ##  [4] htmlwidgets_1.6.4      Biobase_2.73.2         vctrs_0.7.3           
     ##  [7] tools_4.6.1            curl_7.1.0             parallel_4.6.1        
-    ## [10] tibble_3.3.1           RSQLite_3.53.3         cluster_2.1.8.2       
+    ## [10] tibble_3.3.1           RSQLite_3.53.3         cluster_2.1.8.3       
     ## [13] blob_1.3.0             pkgconfig_2.0.3        data.table_1.18.4     
     ## [16] dbplyr_2.6.0           desc_1.4.3             lifecycle_1.0.5       
     ## [19] compiler_4.6.1         textshaping_1.0.5      codetools_0.2-20      
@@ -620,7 +620,7 @@ sessionInfo()
     ## [31] MASS_7.3-66            cachem_1.1.0           MetaboCoreUtils_1.21.1
     ## [34] tidyselect_1.2.1       rvest_1.0.5            digest_0.6.39         
     ## [37] purrr_1.2.2            dplyr_1.2.1            bookdown_0.47         
-    ## [40] fastmap_1.2.0          archive_1.1.13         cli_3.6.6             
+    ## [40] fastmap_1.2.0          archive_1.1.14         cli_3.6.6             
     ## [43] magrittr_2.0.5         withr_3.0.3            filelock_1.0.3        
     ## [46] bit64_4.8.2            rmarkdown_2.31         httr_1.4.8            
     ## [49] bit_4.6.0              otel_0.2.0             ragg_1.5.2            
