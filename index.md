@@ -22,11 +22,9 @@ to avoid repeated download.
 
 The package can be installed with
 
-``` r
-
-install.packages("BiocManager")
-BiocManager::install("MsBackendMetabolomicsWorkbench")
-```
+\
+[`install.packages`](https://rdrr.io/r/utils/install.packages.html)`(``"BiocManager"``)`\
+`BiocManager``::`[`install`](https://bioconductor.github.io/BiocManager/reference/install.html)`(``"MsBackendMetabolomicsWorkbench"``)`
 
 # Contributions
 
