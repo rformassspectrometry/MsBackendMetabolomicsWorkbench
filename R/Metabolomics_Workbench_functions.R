@@ -208,7 +208,8 @@ mwb_list_files <- function(x = character(), pattern = NULL) {
              files?")
 
     if (length(pattern))
-        anno_df[grepl(pattern, anno_df$sample_file), ]
+        anno_df[grepl(pattern, anno_df$sample_file) |
+                grepl(gsub("\\+", "%2B", pattern), anno_df$sample_file), ]
     else
         anno_df
 }
@@ -477,12 +478,14 @@ mwb_cached_data_files <- function(mwbId = character(),
         stop("No files matching the provided file pattern found for ",
                 "Metabolomics Workbench data set ", mwbId, ".", call. = FALSE)
     }
-    dfiles$parsed_name <- basename(URLdecode(gsub("\\+", "%20",
-                                                  dfiles$sample_file)))
+    dfiles$parsed_name <- URLdecode(gsub("\\+", "%20", dfiles$sample_file))
     ## Filter by fileName
     if (length(fileName)) {
         dfiles <- .mwb_filename_filter(dfiles, fileName, mwbId)
     }
+    ## If files in subfolders, convert to a single level structure
+    dfiles$parsed_name <- gsub("/", "_", dfiles$parsed_name)
+
     bfc <- BiocFileCache()
     res_cached <- .mwb_bfc_table(bfc, mwbId)
     res_to_download <- .mwb_to_download(dfiles, res_cached)
@@ -719,8 +722,8 @@ mwb_delete_cache <- function(mwbId = character()) {
 #' @noRd
 .mwb_filename_filter <- function(dfiles, fileName, mwbId) {
     fileName_parsed <- URLdecode(gsub("\\+", "%20", fileName))
-    keep <- dfiles$parsed_name %in% fileName |
-                dfiles$parsed_name %in% fileName_parsed
+    keep <- basename(dfiles$parsed_name) %in% fileName |
+                basename(dfiles$parsed_name) %in% fileName_parsed
     if (!any(keep))
         stop("None of the 'fileName' found in data set \"", mwbId, "\"")
     dfiles[keep, ]

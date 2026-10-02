@@ -15,37 +15,51 @@ exportMethods(backendInitialize)
 exportMethods(backendRequiredSpectraVariables)
 importClassesFrom(Spectra,MsBackendDataFrame)
 importClassesFrom(Spectra,MsBackendMzR)
-importFrom(BiocFileCache,BiocFileCache)
-importFrom(BiocFileCache,bfcinfo)
-importFrom(BiocFileCache,bfcremove)
+importFrom(BiocFileCache,
+  BiocFileCache,
+  bfcinfo,
+  bfcremove
+)
 importFrom(MsCoreUtils,retry)
 importFrom(S4Vectors,DataFrame)
-importFrom(Spectra,MsBackendMzR)
-importFrom(Spectra,Spectra)
+importFrom(Spectra,
+  MsBackendMzR,
+  Spectra
+)
 importFrom(archive,archive_extract)
-importFrom(curl,curl)
-importFrom(curl,handle_setopt)
-importFrom(curl,new_handle)
-importFrom(httr2,req_body_form)
-importFrom(httr2,req_perform)
-importFrom(httr2,req_url_query)
-importFrom(httr2,request)
-importFrom(httr2,resp_body_html)
-importFrom(httr2,resp_body_string)
-importFrom(httr2,resp_status)
+importFrom(curl,
+  curl,
+  handle_setopt,
+  new_handle
+)
+importFrom(httr2,
+  req_body_form,
+  req_perform,
+  req_url_query,
+  request,
+  resp_body_html,
+  resp_body_string,
+  resp_status
+)
 importFrom(jsonlite,fromJSON)
-importFrom(methods,as)
-importFrom(methods,callNextMethod)
-importFrom(methods,new)
-importFrom(methods,validObject)
+importFrom(methods,
+  as,
+  callNextMethod,
+  new,
+  validObject
+)
 importFrom(plyr,rbind.fill)
-importFrom(rvest,html_attr)
-importFrom(rvest,html_nodes)
+importFrom(rvest,
+  html_attr,
+  html_nodes
+)
 importFrom(tidyr,unnest)
 importFrom(tools,file_path_sans_ext)
-importFrom(utils,URLdecode)
-importFrom(utils,capture.output)
-importFrom(utils,download.file)
+importFrom(utils,
+  URLdecode,
+  capture.output,
+  download.file
+)
 importMethodsFrom(BiocFileCache,"bfcmeta<-")
 importMethodsFrom(BiocFileCache,bfcadd)
 importMethodsFrom(BiocFileCache,bfccache)
