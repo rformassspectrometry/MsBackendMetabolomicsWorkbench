@@ -389,10 +389,12 @@ mwb_metadata <- function(mwbId = character()) {
         meta_list_df <- meta_list_df[vapply(meta_list_df, nrow, 1L) != 0]
         exp_df <- do.call(cbind, meta_list_df)
         ## Data.frame with the metadata of the samples.
-        df_cols <- names(which(lapply(meta_list[["SUBJECT_SAMPLE_FACTORS"]],
-                                      is.data.frame) == TRUE))
-        sample_df <- meta_list[["SUBJECT_SAMPLE_FACTORS"]] |>
-                        unnest(cols = eval(df_cols), names_sep = ": ")
+        sample_df <- do.call(rbind,
+                lapply(meta_list[["SUBJECT_SAMPLE_FACTORS"]], function(x){
+                    df_cols <- names(which(vapply(x, is.data.frame, NA)))
+                    sample_df <- unnest(x, cols = eval(df_cols),
+                                        names_sep = ": ")
+                }))
 
         meta_df <- list("MS_run" = exp_df, "sample_annotation" = sample_df)
     })
