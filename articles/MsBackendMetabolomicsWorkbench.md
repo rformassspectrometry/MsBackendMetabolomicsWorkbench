@@ -9,8 +9,8 @@ Bolzano under the Joint Projects South Tyrol–Germany 2025 program.),
 Philippine Louail \[aut\] (ORCID:
 <https://orcid.org/0009-0007-5429-6846>), Johannes Rainer \[aut\]
 (ORCID: <https://orcid.org/0000-0002-6977-7147>)\
-**Last modified:** 2026-10-02 13:38:18.22187\
-**Compiled**: Fri Oct 2 13:54:39 2026
+**Last modified:** 2026-10-22 13:54:40.016612\
+**Compiled**: Thu Oct 22 14:05:52 2026
 
 ## Introduction
 
@@ -394,10 +394,10 @@ Workbench data set *ST002115*:
     ## [1] "-"
     ## 
     ## $license
-    ## [1] "CC BY 4.0"
+    ## [1] "CC BY-NC-ND"
     ## 
     ## $license_url
-    ## [1] "https://creativecommons.org/licenses/by/4.0/"
+    ## [1] "https://creativecommons.org/licenses/by-nc-nd/4.0/deed.en"
     ## 
     ## $study_url
     ## [1] "https://www.metabolomicsworkbench.org/data/DRCCMetadata.php?StudyID=ST002115"
@@ -547,7 +547,7 @@ Below we retrieve the metadata of the data set *ST002115*:
 
     ## R version 4.6.1 (2026-06-24)
     ## Platform: x86_64-pc-linux-gnu
-    ## Running under: Ubuntu 24.04.4 LTS
+    ## Running under: Ubuntu 24.04.5 LTS
     ## 
     ## Matrix products: default
     ## BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3 
@@ -569,15 +569,15 @@ Below we retrieve the metadata of the data set *ST002115*:
     ## [8] base     
     ## 
     ## other attached packages:
-    ## [1] jsonlite_2.0.0                        MsBackendMetabolomicsWorkbench_0.99.2
+    ## [1] jsonlite_2.0.0                        MsBackendMetabolomicsWorkbench_0.99.3
     ## [3] Spectra_1.23.5                        BiocParallel_1.47.0                  
     ## [5] S4Vectors_0.51.10                     BiocGenerics_0.59.12                 
     ## [7] generics_0.1.4                        BiocStyle_2.41.0                     
     ## 
     ## loaded via a namespace (and not attached):
-    ##  [1] xfun_0.61              bslib_0.12.0           httr2_1.3.0           
+    ##  [1] xfun_0.62              bslib_0.12.0           httr2_1.3.0           
     ##  [4] htmlwidgets_1.6.4      Biobase_2.73.2         vctrs_0.7.3           
-    ##  [7] tools_4.6.1            curl_8.0.0             parallel_4.6.1        
+    ##  [7] tools_4.6.1            curl_8.1.0             parallel_4.6.1        
     ## [10] tibble_3.3.1           RSQLite_3.53.3         cluster_2.1.8.3       
     ## [13] blob_1.3.0             pkgconfig_2.0.3        data.table_1.18.6.1   
     ## [16] dbplyr_2.6.0           desc_1.4.3             lifecycle_1.0.5       
@@ -585,7 +585,7 @@ Below we retrieve the metadata of the data set *ST002115*:
     ## [22] ncdf4_1.24             clue_0.3-68            htmltools_0.5.9       
     ## [25] sass_0.4.10            yaml_2.3.12            tidyr_1.3.2           
     ## [28] pkgdown_2.2.1.9000     pillar_1.11.1          jquerylib_0.1.4       
-    ## [31] MASS_7.3-66            cachem_1.1.0           MetaboCoreUtils_1.21.1
+    ## [31] MASS_7.3-66            cachem_1.1.0           MetaboCoreUtils_1.21.2
     ## [34] tidyselect_1.2.1       rvest_1.0.5            digest_0.6.39         
     ## [37] purrr_1.2.2            dplyr_1.2.1            bookdown_0.48         
     ## [40] fastmap_1.2.0          archive_1.1.14         cli_3.6.6             

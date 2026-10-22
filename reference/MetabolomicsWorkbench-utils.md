@@ -255,7 +255,7 @@ A1_mzMLfiles
 
 ## Query the REST API for a study summary in JSON format
 mwb_rest_request("ST002115", outputItem = "summary")
-#> [1] "{\"study_id\":\"ST002115\",\"study_title\":\"LC-MS analysis of metabolic changes induced by GPX4 inhibitor treatment in cultured HT1080 cells\",\"species\":\"Homo sapiens\",\"institute\":\"University of Texas MD Anderson Cancer Center\",\"analysis_type\":\"LC-MS\",\"number_of_samples\":\"12\",\"submission_date\":\"2022-04-20\",\"release_date\":\"2022-04-14\",\"version\":\"1\",\"revision_no\":\"1\",\"revision_datetime\":\"-\",\"revision_comment\":\"-\",\"license\":\"CC BY 4.0\",\"license_url\":\"https:\\/\\/creativecommons.org\\/licenses\\/by\\/4.0\\/\",\"study_url\":\"https:\\/\\/www.metabolomicsworkbench.org\\/data\\/DRCCMetadata.php?StudyID=ST002115\"}"
+#> [1] "{\"study_id\":\"ST002115\",\"study_title\":\"LC-MS analysis of metabolic changes induced by GPX4 inhibitor treatment in cultured HT1080 cells\",\"species\":\"Homo sapiens\",\"institute\":\"University of Texas MD Anderson Cancer Center\",\"analysis_type\":\"LC-MS\",\"number_of_samples\":\"12\",\"submission_date\":\"2022-04-20\",\"release_date\":\"2022-04-14\",\"version\":\"1\",\"revision_no\":\"1\",\"revision_datetime\":\"-\",\"revision_comment\":\"-\",\"license\":\"CC BY-NC-ND\",\"license_url\":\"https:\\/\\/creativecommons.org\\/licenses\\/by-nc-nd\\/4.0\\/deed.en\",\"study_url\":\"https:\\/\\/www.metabolomicsworkbench.org\\/data\\/DRCCMetadata.php?StudyID=ST002115\"}"
 
 ## List zip file of the data set ST002115
 mwb_ftp_list_files("ST002115")
