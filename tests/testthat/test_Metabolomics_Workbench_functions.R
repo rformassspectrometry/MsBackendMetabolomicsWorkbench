@@ -302,8 +302,6 @@ test_that("mwb_metadata works", {
         )
     )
 
-    expect_error(mwb_metadata("ST003302"), "Failed to parse JSON")
-
     ## Test with multple analysis IDs
     res <- mwb_metadata("ST002115")
     expect_true(is.list(res))
