@@ -2,6 +2,11 @@
 
 ## MsBackendMetabolomicsWorkbench 0.99
 
+### Changes in 0.99.4
+
+- Add tests.
+- Add codecov badge.
+
 ### Changes in 0.99.3
 
 - Fix metadata download after changes in JSON parsing.

@@ -7,6 +7,7 @@ developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.re
 [![:name status
 badge](https://rformassspectrometry.r-universe.dev/badges/:name)](https://rformassspectrometry.r-universe.dev/)
 [![license](https://img.shields.io/badge/license-GPL--3.0-brightgreen.svg)](https://opensource.org/license/gpl-3.0)
+[![codecov](https://codecov.io/gh/rformassspectrometry/MsBackendMetabolomicsWorkbench/graph/badge.svg?token=IAcaVyRxYh)](https://codecov.io/gh/rformassspectrometry/MsBackendMetabolomicsWorkbench)
 
 This repository provides a *backend* for
 [Spectra](https://github.com/RforMassSpectrometry/Spectra) objects that

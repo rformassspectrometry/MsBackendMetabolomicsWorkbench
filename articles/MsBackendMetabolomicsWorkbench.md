@@ -9,8 +9,8 @@ Bolzano under the Joint Projects South Tyrol–Germany 2025 program.),
 Philippine Louail \[aut\] (ORCID:
 <https://orcid.org/0009-0007-5429-6846>), Johannes Rainer \[aut\]
 (ORCID: <https://orcid.org/0000-0002-6977-7147>)\
-**Last modified:** 2026-11-17 09:30:27.044471\
-**Compiled**: Tue Nov 17 09:40:38 2026
+**Last modified:** 2026-11-17 14:20:52.007766\
+**Compiled**: Tue Nov 17 14:29:44 2026
 
 ## Introduction
 
@@ -574,7 +574,7 @@ license](https://creativecommons.org/licenses/by-sa/4.0/).
     ## [8] base     
     ## 
     ## other attached packages:
-    ## [1] jsonlite_2.0.0                        MsBackendMetabolomicsWorkbench_0.99.3
+    ## [1] jsonlite_2.0.0                        MsBackendMetabolomicsWorkbench_0.99.4
     ## [3] Spectra_1.23.7                        BiocParallel_1.47.0                  
     ## [5] S4Vectors_0.51.10                     BiocGenerics_0.59.13                 
     ## [7] generics_0.1.4                        BiocStyle_2.41.0                     
