@@ -9,8 +9,8 @@ Bolzano under the Joint Projects South Tyrol–Germany 2025 program.),
 Philippine Louail \[aut\] (ORCID:
 <https://orcid.org/0009-0007-5429-6846>), Johannes Rainer \[aut\]
 (ORCID: <https://orcid.org/0000-0002-6977-7147>)\
-**Last modified:** 2026-10-22 13:54:40.016612\
-**Compiled**: Thu Oct 22 14:05:52 2026
+**Last modified:** 2026-11-17 09:09:56.42134\
+**Compiled**: Tue Nov 17 09:23:00 2026
 
 ## Introduction
 
@@ -298,7 +298,7 @@ the data files of the Metabolomics Workbench data set *ST002115*:
 `res`
 
     ##     rid   mwb_id          zip_file               file_name
-    ## 2 BFC36 ST002115 ST002115_Data.zip HT1080_DMSO_01_RP.mzXML
+    ## 2 BFC72 ST002115 ST002115_Data.zip HT1080_DMSO_01_RP.mzXML
     ##                                                                       rpath
     ## 2 /github/home/.cache/R/BiocFileCache/ST002115_Data_HT1080_DMSO_01_RP.mzXML
 
@@ -313,19 +313,19 @@ settings, a `data.frame` with all available data files is returned.
 [`mwb_cached_data_files`](https://rformassspectrometry.github.io/MsBackendMetabolomicsWorkbench/reference/MetabolomicsWorkbench-utils.md)`(``)`
 
     ##      rid   mwb_id          zip_file                            file_name
-    ## 11 BFC35 ST002115 ST002115_Data.zip              HT1080_DMSO_02_RP.mzXML
-    ## 12 BFC36 ST002115 ST002115_Data.zip              HT1080_DMSO_01_RP.mzXML
-    ## 13 BFC37 ST000016 ST000016_mzML.zip D20101022-LC2-PP0000705-A1-I1-P.mzML
-    ## 14 BFC38 ST002115 ST002115_Data.zip             HT1080_ML162_01_RP.mzXML
-    ## 15 BFC39 ST002115 ST002115_Data.zip             HT1080_ML210_01_RP.mzXML
-    ## 16 BFC40 ST002115 ST002115_Data.zip              HT1080_RSL3_01_RP.mzXML
+    ## 11 BFC37 ST000016 ST000016_mzML.zip D20101022-LC2-PP0000705-A1-I1-P.mzML
+    ## 22 BFC71 ST002115 ST002115_Data.zip              HT1080_DMSO_02_RP.mzXML
+    ## 23 BFC72 ST002115 ST002115_Data.zip              HT1080_DMSO_01_RP.mzXML
+    ## 24 BFC73 ST002115 ST002115_Data.zip             HT1080_ML162_01_RP.mzXML
+    ## 25 BFC74 ST002115 ST002115_Data.zip             HT1080_ML210_01_RP.mzXML
+    ## 26 BFC75 ST002115 ST002115_Data.zip              HT1080_RSL3_01_RP.mzXML
     ##                                                                                     rpath
-    ## 11              /github/home/.cache/R/BiocFileCache/ST002115_Data_HT1080_DMSO_02_RP.mzXML
-    ## 12              /github/home/.cache/R/BiocFileCache/ST002115_Data_HT1080_DMSO_01_RP.mzXML
-    ## 13 /github/home/.cache/R/BiocFileCache/ST000016_mzML_D20101022-LC2-PP0000705-A1-I1-P.mzML
-    ## 14             /github/home/.cache/R/BiocFileCache/ST002115_Data_HT1080_ML162_01_RP.mzXML
-    ## 15             /github/home/.cache/R/BiocFileCache/ST002115_Data_HT1080_ML210_01_RP.mzXML
-    ## 16              /github/home/.cache/R/BiocFileCache/ST002115_Data_HT1080_RSL3_01_RP.mzXML
+    ## 11 /github/home/.cache/R/BiocFileCache/ST000016_mzML_D20101022-LC2-PP0000705-A1-I1-P.mzML
+    ## 22              /github/home/.cache/R/BiocFileCache/ST002115_Data_HT1080_DMSO_02_RP.mzXML
+    ## 23              /github/home/.cache/R/BiocFileCache/ST002115_Data_HT1080_DMSO_01_RP.mzXML
+    ## 24             /github/home/.cache/R/BiocFileCache/ST002115_Data_HT1080_ML162_01_RP.mzXML
+    ## 25             /github/home/.cache/R/BiocFileCache/ST002115_Data_HT1080_ML210_01_RP.mzXML
+    ## 26              /github/home/.cache/R/BiocFileCache/ST002115_Data_HT1080_RSL3_01_RP.mzXML
 
 Locally cached files for a Metabolomics Workbench data set can be
 removed using the
@@ -355,7 +355,7 @@ Workbench data set *ST002115*:
 \
 `summary`` ``<-`` `[`mwb_rest_request`](https://rformassspectrometry.github.io/MsBackendMetabolomicsWorkbench/reference/MetabolomicsWorkbench-utils.md)`(``"ST002115"``, outputItem ``=`` ``"summary"``,`\
 `                            outputFormat ``=`` ``"json"``)`\
-[`fromJSON`](https://jeroen.r-universe.dev/jsonlite/reference/fromJSON.html)`(``summary``)`
+[`fromJSON`](https://rdrr.io/pkg/jsonlite/man/fromJSON.html)`(``summary``)`
 
     ## $study_id
     ## [1] "ST002115"
@@ -540,6 +540,11 @@ Below we retrieve the metadata of the data set *ST002115*:
     ## 11              HT1080_RSL3_02_HILIC.mzXML
     ## 12              HT1080_RSL3_03_HILIC.mzXML
 
+## License
+
+This vignette is distributed under a [CC BY-SA
+license](https://creativecommons.org/licenses/by-sa/4.0/).
+
 ## Session information
 
 \
@@ -570,8 +575,8 @@ Below we retrieve the metadata of the data set *ST002115*:
     ## 
     ## other attached packages:
     ## [1] jsonlite_2.0.0                        MsBackendMetabolomicsWorkbench_0.99.3
-    ## [3] Spectra_1.23.5                        BiocParallel_1.47.0                  
-    ## [5] S4Vectors_0.51.10                     BiocGenerics_0.59.12                 
+    ## [3] Spectra_1.23.7                        BiocParallel_1.47.0                  
+    ## [5] S4Vectors_0.51.10                     BiocGenerics_0.59.13                 
     ## [7] generics_0.1.4                        BiocStyle_2.41.0                     
     ## 
     ## loaded via a namespace (and not attached):
@@ -593,9 +598,9 @@ Below we retrieve the metadata of the data set *ST002115*:
     ## [46] bit64_4.8.6            rmarkdown_2.32         httr_1.4.9            
     ## [49] bit_4.6.0              otel_0.2.0             ragg_1.5.2            
     ## [52] memoise_2.0.1          evaluate_1.0.5         knitr_1.52            
-    ## [55] IRanges_2.47.5         BiocFileCache_3.3.0    rlang_1.3.0           
+    ## [55] IRanges_2.47.5         BiocFileCache_3.3.3    rlang_1.3.0           
     ## [58] Rcpp_1.1.2             glue_1.8.1             DBI_1.3.0             
-    ## [61] mzR_2.47.1             selectr_0.8-0          BiocManager_1.30.27   
+    ## [61] mzR_2.47.2             selectr_0.8-0          BiocManager_1.30.27   
     ## [64] xml2_1.6.0             R6_2.6.1               plyr_1.8.9            
     ## [67] systemfonts_1.3.2      fs_2.1.0               ProtGenerics_1.45.0   
     ## [70] MsCoreUtils_1.25.4
