@@ -33,14 +33,12 @@ guidelines](https://rformassspectrometry.github.io/RforMassSpectrometry/articles
 Also, please check the coding style guidelines in the [RforMassSpectrometry
 vignette](https://rformassspectrometry.github.io/RforMassSpectrometry/articles/RforMassSpectrometry.html).
 
-## License
+## 📄 License
 
-This package is licensed under the **GPL 3.0 License**:
-📄 [https://opensource.org/license/gpl-3.0](https://opensource.org/license/gpl-3.0)
-
-Documentation (manuals, vignettes) is licensed under **CC BY-NC-SA 4.0**:
-📄 [https://creativecommons.org/licenses/by-nc-sa/4.0/](https://creativecommons.org/licenses/by-nc-sa/4.0/)
-
+The *MsBackendMetabolomicsWorkbench* code is provided under a
+[GPL-3](https://opensource.org/license/gpl-3.0) license. The documentation,
+including the manual pages and the vignettes, are distributed under a [CC
+BY-SA](https://creativecommons.org/licenses/by-sa/4.0/) license.
 
 # Funding information
 
